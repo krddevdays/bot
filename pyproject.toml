@@ -1,0 +1,23 @@
+[project]
+name = "krddevbot"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "TyVik", email = "tyvik@krd.dev"}
+]
+license = {text = "MIT"}
+requires-python = ">=3.10"
+
+dependencies = [
+    "python-telegram-bot",
+]
+
+[project.urls]
+Homepage = "https://t.me/krddevdays_chat"
+Repository = "https://github.com/krddevdays/bot"
+
+[project.scripts]
+pdm = "pdm.core:main"
+
+[tool.pdm.scripts]
+_.env_file = ".env"
