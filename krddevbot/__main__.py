@@ -26,8 +26,7 @@ def main():
     BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
     if not BOT_TOKEN: 
-        logger.error("Environment variable BOT_TOKEN not exists!")
-        sys.exit(1)
+        raise Exception("Setup env variable BOT_TOKEN")
 
     application = Application.builder().token(BOT_TOKEN).build()
 
