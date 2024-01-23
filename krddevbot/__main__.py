@@ -23,12 +23,19 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_text("Help!")
 
 
-if __name__ == "__main__":
+def main():
+    """main function for export"""
     BOT_TOKEN = os.environ.get("BOT_TOKEN")
-    application = Application.builder().token(BOT_TOKEN).build()
+    if BOT_TOKEN: 
+        application = Application.builder().token(BOT_TOKEN).build()
 
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
-    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, days_without_mention))
+        application.add_handler(CommandHandler("help", help_command))
+        application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
+        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, days_without_mention))
 
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+        application.run_polling(allowed_updates=Update.ALL_TYPES)
+    else:
+        logger.error("Environment variable BOT_TOKEN not exists!")
+
+if __name__ == "__main__":
+    main()

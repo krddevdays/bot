@@ -17,7 +17,7 @@ Homepage = "https://t.me/krddevdays_chat"
 Repository = "https://github.com/krddevdays/bot"
 
 [project.scripts]
-pdm = "pdm.core:main"
+bot = "krddevbot:main"
 
 [tool.pdm.scripts]
 _.env_file = ".env"

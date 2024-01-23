@@ -1,2 +1,8 @@
+## IDE
+.pdm-python
+krddevbot.egg-info/
+krddevbot/__pycache__/
+
+## Project
 .env
 tander/
