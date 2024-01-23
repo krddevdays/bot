@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import logging
 import os
+import sys
 
 from telegram import Update
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ContextTypes, MessageHandler, filters
@@ -26,16 +27,18 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 def main():
     """main function for export"""
     BOT_TOKEN = os.environ.get("BOT_TOKEN")
-    if BOT_TOKEN: 
-        application = Application.builder().token(BOT_TOKEN).build()
 
-        application.add_handler(CommandHandler("help", help_command))
-        application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, days_without_mention))
-
-        application.run_polling(allowed_updates=Update.ALL_TYPES)
-    else:
+    if not BOT_TOKEN: 
         logger.error("Environment variable BOT_TOKEN not exists!")
+        sys.exit(1)
+
+    application = Application.builder().token(BOT_TOKEN).build()
+
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, days_without_mention))
+
+    application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 if __name__ == "__main__":
     main()
