@@ -1,3 +1,4 @@
+import logging
 from typing import Optional, Tuple
 
 import httpx
@@ -12,6 +13,9 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
     of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
     the status didn't change.
     """
+    logger = logging.getLogger(__name__)
+    logging.info("Extract status change")
+
     status_change = chat_member_update.difference().get("status")
     old_is_member, new_is_member = chat_member_update.difference().get("is_member", (None, None))
 
@@ -35,6 +39,9 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
 
 async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Greets new users in chats and announces when someone leaves"""
+    logger = logging.getLogger(__name__)
+    logging.info("Greet chat member")
+
     result = extract_status_change(update.chat_member)
     if result is None:
         return

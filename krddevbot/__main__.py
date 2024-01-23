@@ -8,6 +8,7 @@ from telegram.ext import Application, ChatMemberHandler, CommandHandler, Context
 
 from krddevbot.antispam import greet_chat_members
 from krddevbot.tander import days_without_mention
+from krddevbot.help import help_command
 
 
 logging.basicConfig(
@@ -18,10 +19,6 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 
 logger = logging.getLogger(__name__)
 
-
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Send a message when the command /help is issued."""
-    await update.message.reply_text("Help!")
 
 
 def main():
