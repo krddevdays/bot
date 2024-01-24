@@ -1,11 +1,29 @@
 from typing import Optional, Tuple
 
+import asyncio
 import httpx
+import random
 from telegram import ChatMember, ChatMemberUpdated, Update
 from telegram.constants import ParseMode
 
 from telegram.ext import ContextTypes
 
+# Feature Flags Inc. & Config Brothers
+DARKBYTE_ENABLED = True
+BAN_ENABLED = True
+BAN_TIMEOUT_SECONDS = 60
+
+# Main cluster database 100500 pods in k8s required
+CHECKING_MEMBERS = {}
+
+# Secret store
+EMOJI = {
+  "рукой": "👍",
+  "огнем": "🔥",
+  "лицом": "🥰",
+  "животным": "🦄",
+  "едой": "🌭",
+}
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
@@ -40,12 +58,47 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     was_member, is_member = result
-    if not was_member and is_member:
-        response = httpx.get(f"https://spam.darkbyte.ru/?a={update.chat_member.new_chat_member.user.id}")
-        data = response.json()
-        should_ban = data["banned"] or data["spam_factor"] > 30
-        message = f"`{response.content.decode()}` \=\> {should_ban}"
-        await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
+    
+    # Verifying the user is a new member
+    if was_member or not is_member:
+        return
+    
+    if DARKBYTE_ENABLED:
+      response = httpx.get(f"https://spam.darkbyte.ru/?a={update.chat_member.new_chat_member.user.id}")
+      data = response.json()
+      should_ban = data["banned"] or data["spam_factor"] > 30
+      message = f"`{response.content.decode()}` \\=\\> {should_ban}"
+      await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
-        if should_ban:
-            await update.chat_member.chat.ban_member(update.chat_member.new_chat_member.user.id, revoke_messages=True)
+      if should_ban:
+          await update.chat_member.chat.ban_member(update.chat_member.new_chat_member.user.id, revoke_messages=True)
+          return
+    
+    challenge = random.choice(list(EMOJI.keys()))
+
+    message = f"Уважаемый @{update.chat_member.new_chat_member.user.username}\n"
+    message += "Добро пожаловать в чаты сообщества krd\\.dev\\!\n\n"
+    message += f"Подтвердите, что вы кожаный мешок, поставив эмодзи с {challenge} из стандартного набора этому сообщению\\."
+
+    sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
+
+    user_id = update.chat_member.new_chat_member.user.id
+    CHECKING_MEMBERS[user_id] = f'{sent_msg.id}={EMOJI[challenge]}'
+
+    context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS, 
+                               user_id=user_id, 
+                               chat_id=update.effective_chat.id, 
+                               data={'username': update.chat_member.new_chat_member.user.username})
+
+
+async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
+    if context.job.user_id in CHECKING_MEMBERS:
+      await context.bot.send_message(chat_id=context.job.chat_id, 
+                                     text=f'Timeout! Лови BANAN 🍌, @{context.job.data['username']}!')
+      await context.bot.ban_chat_member(chat_id=context.job.chat_id,
+                                        user_id=context.job.user_id, 
+                                        revoke_messages=True)
+    else:
+      await context.bot.send_message(chat_id=context.job.chat_id, 
+                                     text=f'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, @{context.job.data['username']}!')
+      
