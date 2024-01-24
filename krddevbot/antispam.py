@@ -11,7 +11,7 @@ from telegram.ext import ContextTypes
 # Feature Flags Inc. & Config Brothers
 DARKBYTE_ENABLED = True
 BAN_ENABLED = True
-BAN_TIMEOUT_SECONDS = 10
+BAN_TIMEOUT_SECONDS = 60
 
 # Main cluster database 100500 pods in k8s required
 CHECKING_MEMBERS = {}
