@@ -11,19 +11,21 @@ from telegram.ext import ContextTypes
 # Feature Flags Inc. & Config Brothers
 DARKBYTE_ENABLED = True
 BAN_ENABLED = True
-BAN_TIMEOUT_SECONDS = 60
+BAN_TIMEOUT_SECONDS = 10
 
 # Main cluster database 100500 pods in k8s required
 CHECKING_MEMBERS = {}
 
 # Secret store
 EMOJI = {
-  "рукой": "👍",
+  "рукой": "👍👎👏🙏👌🖕🤝✍️💅",
   "огнем": "🔥",
-  "лицом": "🥰",
-  "животным": "🦄",
-  "едой": "🌭",
+  "сердцем": "❤️💘💔❤️‍🔥",
+  "лицом": "🥰😁🤔🤯😱🤬😢🤩🤮🤡🥱🥴😍🌚🤣🤨😐😈😴😭🤓😇😨🤗🎅🤪😘😎😡",
+  "животным": "🕊🐳🙈🙉🦄🙊👾☃️",
+  "едой": "🍓🌭🍌🍾💊🎃",
 }
+
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
@@ -83,7 +85,11 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
     sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
     user_id = update.chat_member.new_chat_member.user.id
-    CHECKING_MEMBERS[user_id] = f'{sent_msg.id}={EMOJI[challenge]}'
+    
+    CHECKING_MEMBERS[user_id] = {
+       'message_id': sent_msg.id, 
+       'emoji': EMOJI[challenge],
+    }
 
     context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS, 
                                user_id=user_id, 
