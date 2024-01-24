@@ -65,36 +65,36 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if was_member or not is_member:
         return
     
+    user = update.chat_member.new_chat_member.user
+
     if DARKBYTE_ENABLED:
-      response = httpx.get(f"https://spam.darkbyte.ru/?a={update.chat_member.new_chat_member.user.id}")
+      response = httpx.get(f"https://spam.darkbyte.ru/?a={user.id}")
       data = response.json()
       should_ban = data["banned"] or data["spam_factor"] > 30
       message = f"`{response.content.decode()}` \\=\\> {should_ban}"
       await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
       if should_ban:
-          await update.chat_member.chat.ban_member(update.chat_member.new_chat_member.user.id, revoke_messages=True)
+          await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
           return
     
     challenge = random.choice(list(EMOJI.keys()))
 
-    message = f"Уважаемый @{update.chat_member.new_chat_member.user.username}\n"
+    message = f"Уважаемый @{user.username}\n"
     message += "Добро пожаловать в чаты сообщества krd\\.dev\\!\n\n"
     message += f"Подтвердите, что вы кожаный мешок, поставив эмодзи с {challenge} из стандартного набора этому сообщению\\."
 
     sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
-    user_id = update.chat_member.new_chat_member.user.id
-    
-    CHECKING_MEMBERS[user_id] = {
+    CHECKING_MEMBERS[user.id] = {
        'message_id': sent_msg.id, 
        'emoji': EMOJI[challenge],
     }
 
     context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS, 
-                               user_id=user_id, 
+                               user_id=user.id, 
                                chat_id=update.effective_chat.id, 
-                               data={'username': update.chat_member.new_chat_member.user.username})
+                               data={'username': user.username})
 
 
 async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
