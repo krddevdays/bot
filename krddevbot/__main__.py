@@ -7,7 +7,8 @@ from telegram.ext import Application, ChatMemberHandler, CommandHandler, Context
 
 from krddevbot.antispam import greet_chat_members
 from krddevbot.tander import days_without_mention
-
+from krddevbot.reactions_handler import MESSAGE_REACTION, ReactionsHandler
+from krddevbot.antispam_reactions import antispam_reactions_checking
 
 logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
@@ -29,6 +30,7 @@ if __name__ == "__main__":
 
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
+    application.add_handler(ReactionsHandler(antispam_reactions_checking))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, days_without_mention))
 
-    application.run_polling(allowed_updates=Update.ALL_TYPES)
+    application.run_polling(allowed_updates=Update.ALL_TYPES + [MESSAGE_REACTION])

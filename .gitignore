@@ -1,2 +1,11 @@
+## IDE
+.vscode/
+.history/
+.pdm-python
+krddevbot.egg-info/
+krddevbot/__pycache__/
+__pypackages__/
+tmp/
+
 .env
 tander/

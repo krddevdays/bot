@@ -9,7 +9,7 @@ license = {text = "MIT"}
 requires-python = ">=3.10"
 
 dependencies = [
-    "python-telegram-bot",
+    "python-telegram-bot[job-queue]>=20.7",
 ]
 
 [project.urls]
@@ -21,3 +21,6 @@ pdm = "pdm.core:main"
 
 [tool.pdm.scripts]
 _.env_file = ".env"
+bot = "python -m krddevbot"  
+
+# dev run: nodemon -e py --exec pdm run bot
