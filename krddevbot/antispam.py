@@ -26,6 +26,15 @@ EMOJI = {
   "едой": "🍓🌭🍌🍾💊🎃",
 }
 
+GREETING_MESSAGE_TEMPLATE = """
+Уважаемый @{username}
+Добро пожаловать в чаты сообщества krd\\.dev\\!
+
+Подтвердите, что вы кожаный мешок, поставив эмодзи с {challenge_text} из стандартного набора этому сообщению\\.
+
+У вас {timeout} секунд\\.\\.\\.
+"""
+
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
@@ -78,17 +87,17 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
           await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
           return
     
-    challenge = random.choice(list(EMOJI.keys()))
+    challenge_text = random.choice(list(EMOJI.keys()))
 
-    message = f"Уважаемый @{user.username}\n"
-    message += "Добро пожаловать в чаты сообщества krd\\.dev\\!\n\n"
-    message += f"Подтвердите, что вы кожаный мешок, поставив эмодзи с {challenge} из стандартного набора этому сообщению\\."
+    message = GREETING_MESSAGE_TEMPLATE.format(username=user.username, 
+                                               challenge_text=challenge_text,
+                                               timeout=BAN_TIMEOUT_SECONDS)
 
     sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
     CHECKING_MEMBERS[user.id] = {
        'message_id': sent_msg.id, 
-       'emoji': EMOJI[challenge],
+       'emoji': EMOJI[challenge_text],
     }
 
     context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS, 
