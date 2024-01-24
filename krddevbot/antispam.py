@@ -84,7 +84,8 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
       await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
       if should_ban:
-          await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
+          if BAN_ENABLED:
+            await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
           return
     
     challenge_text = random.choice(list(EMOJI.keys()))
@@ -110,9 +111,10 @@ async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     if context.job.user_id in CHECKING_MEMBERS:
       await context.bot.send_message(chat_id=context.job.chat_id, 
                                      text=f'Timeout! Лови BANAN 🍌, @{context.job.data['username']}!')
-      await context.bot.ban_chat_member(chat_id=context.job.chat_id,
-                                        user_id=context.job.user_id, 
-                                        revoke_messages=True)
+      if BAN_ENABLED:
+        await context.bot.ban_chat_member(chat_id=context.job.chat_id,
+                                          user_id=context.job.user_id, 
+                                          revoke_messages=True)
     else:
       await context.bot.send_message(chat_id=context.job.chat_id, 
                                      text=f'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, @{context.job.data['username']}!')
