@@ -35,6 +35,9 @@ GREETING_MESSAGE_TEMPLATE = """
 У вас {timeout} секунд\\.\\.\\.
 """
 
+TIMEOUT_FAIL_MESSAGE_TEMPLATE = 'Timeout! Лови BANAN 🍌, @{username}!'
+TIMEOUT_OK_MESSAGE_TEMPLATE = 'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, @{username}!'
+
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
@@ -109,13 +112,13 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     if context.job.user_id in CHECKING_MEMBERS:
-      await context.bot.send_message(chat_id=context.job.chat_id, 
-                                     text=f'Timeout! Лови BANAN 🍌, @{context.job.data['username']}!')
+      await context.bot.send_message(chat_id=context.job.chat_id,
+                                     text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(username=context.job.data['username']))
       if BAN_ENABLED:
         await context.bot.ban_chat_member(chat_id=context.job.chat_id,
                                           user_id=context.job.user_id, 
                                           revoke_messages=True)
     else:
       await context.bot.send_message(chat_id=context.job.chat_id, 
-                                     text=f'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, @{context.job.data['username']}!')
+                                     text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(username=context.job.data['username']))
       
