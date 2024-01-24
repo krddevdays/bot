@@ -3,7 +3,7 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from krddevbot.antispam import CHECKING_MEMBERS, BAN_ENABLED
+from krddevbot.antispam import CHECKING_MEMBERS, BAN_ENABLED, CHALLENGE_OK_MESSAGE_TEMPLATE, CHALLENGE_FAIL_MESSAGE
 
 
 async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -38,12 +38,12 @@ async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFA
 
     # Verify emoji on greeting message
     if emoji in challenge['emoji']:
-      await context.bot.send_message(chat_id, f"Добро пожаловать, @{username}!")
+      await context.bot.send_message(chat_id, CHALLENGE_OK_MESSAGE_TEMPLATE.format(username=username))
 
       if user_id in CHECKING_MEMBERS:
         del CHECKING_MEMBERS[user_id]
     else:      
-      await context.bot.send_message(chat_id, "Фатальная ошибка! Лови BANAN 🍌")
+      await context.bot.send_message(chat_id, CHALLENGE_FAIL_MESSAGE)
 
       if BAN_ENABLED:
         await context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id, revoke_messages=True)

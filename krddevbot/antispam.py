@@ -38,6 +38,9 @@ GREETING_MESSAGE_TEMPLATE = """
 TIMEOUT_FAIL_MESSAGE_TEMPLATE = 'Timeout! Лови BANAN 🍌, @{username}!'
 TIMEOUT_OK_MESSAGE_TEMPLATE = 'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, @{username}!'
 
+CHALLENGE_OK_MESSAGE_TEMPLATE = 'Добро пожаловать, @{username}!'
+CHALLENGE_FAIL_MESSAGE = 'Фатальная ошибка! Лови BANAN 🍌'
+
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
