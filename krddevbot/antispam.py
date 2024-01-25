@@ -81,6 +81,7 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
     
     user = update.chat_member.new_chat_member.user
+    chat_id = update.effective_chat.id
 
     if DARKBYTE_ENABLED:
       response = httpx.get(f"https://spam.darkbyte.ru/?a={user.id}")
@@ -102,19 +103,20 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
-    CHECKING_MEMBERS[user.id] = {
+    CHECKING_MEMBERS[f'{user.id}_{chat_id}'] = {
        'message_id': sent_msg.id, 
        'emoji': EMOJI[challenge_text],
     }
 
     context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS, 
                                user_id=user.id, 
-                               chat_id=update.effective_chat.id, 
+                               chat_id=chat_id, 
                                data={'username': user.username})
 
 
 async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
-    if context.job.user_id in CHECKING_MEMBERS:
+    key =f'{context.job.user_id}_{context.job.chat_id}'
+    if key in CHECKING_MEMBERS:
       await context.bot.send_message(chat_id=context.job.chat_id,
                                      text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(username=context.job.data['username']))
       if BAN_ENABLED:
