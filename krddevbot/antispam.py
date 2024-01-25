@@ -111,7 +111,8 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
     context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS,
                                user_id=user.id,
                                chat_id=update.effective_chat.id,
-                               data={'username': user.username,
+                               data={'id': user.id,
+                                     'username': user.username,
                                      'first_name': user.first_name})
 
 
