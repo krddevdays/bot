@@ -25,7 +25,7 @@ async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFA
     username = user.get('username', "")
 
     emoji = reaction.get('emoji', '')
-    challenge = CHECKING_MEMBERS.get(user_id)
+    challenge = CHECKING_MEMBERS.get(f'{user_id}_{chat_id}')
     if not challenge:
       return
     
@@ -41,7 +41,7 @@ async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFA
       await context.bot.send_message(chat_id, CHALLENGE_OK_MESSAGE_TEMPLATE.format(username=username))
 
       if user_id in CHECKING_MEMBERS:
-        del CHECKING_MEMBERS[user_id]
+        del CHECKING_MEMBERS[f'{user_id}_{chat_id}']
     else:      
       await context.bot.send_message(chat_id, CHALLENGE_FAIL_MESSAGE)
 
