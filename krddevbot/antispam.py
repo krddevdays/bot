@@ -1,12 +1,13 @@
 from typing import Optional, Tuple
 
-import asyncio
 import httpx
 import random
 from telegram import ChatMember, ChatMemberUpdated, Update
 from telegram.constants import ParseMode
 
 from telegram.ext import ContextTypes
+
+from krddevbot.service import get_md_user_name
 
 # Feature Flags Inc. & Config Brothers
 DARKBYTE_ENABLED = True
@@ -18,16 +19,16 @@ CHECKING_MEMBERS = {}
 
 # Secret store
 EMOJI = {
-  "рукой": "👍👎👏🙏👌🖕🤝✍️💅",
-  "огнем": "🔥",
-  "сердцем": "❤️💘💔❤️‍🔥",
-  "лицом": "🥰😁🤔🤯😱🤬😢🤩🤮🤡🥱🥴😍🌚🤣🤨😐😈😴😭🤓😇😨🤗🎅🤪😘😎😡",
-  "животным": "🕊🐳🙈🙉🦄🙊👾☃️",
-  "едой": "🍓🌭🍌🍾💊🎃",
+    "рукой": "👍👎👏🙏👌🖕🤝✍️💅",
+    "огнем": "🔥",
+    "сердцем": "❤️💘💔❤️‍🔥",
+    "лицом": "🥰😁🤔🤯😱🤬😢🤩🤮🤡🥱🥴😍🌚🤣🤨😐😈😴😭🤓😇😨🤗🎅🤪😘😎😡",
+    "животным": "🕊🐳🙈🙉🦄🙊👾☃️",
+    "едой": "🍓🌭🍌🍾💊🎃",
 }
 
 GREETING_MESSAGE_TEMPLATE = """
-Уважаемый @{username}
+Уважаемый {username}
 Добро пожаловать в чаты сообщества krd\\.dev\\!
 
 Подтвердите, что вы кожаный мешок, поставив эмодзи с {challenge_text} из стандартного набора этому сообщению\\.
@@ -35,11 +36,11 @@ GREETING_MESSAGE_TEMPLATE = """
 У вас {timeout} секунд\\.\\.\\.
 """
 
-TIMEOUT_FAIL_MESSAGE_TEMPLATE = 'Timeout! Лови BANAN 🍌, @{username}!'
-TIMEOUT_OK_MESSAGE_TEMPLATE = 'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, @{username}!'
+TIMEOUT_FAIL_MESSAGE_TEMPLATE = 'Timeout\\! Лови BANAN 🍌, {username}\\!'
+TIMEOUT_OK_MESSAGE_TEMPLATE = 'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, {username}\\!'
 
-CHALLENGE_OK_MESSAGE_TEMPLATE = 'Добро пожаловать, @{username}!'
-CHALLENGE_FAIL_MESSAGE = 'Фатальная ошибка! Лови BANAN 🍌'
+CHALLENGE_OK_MESSAGE_TEMPLATE = 'Добро пожаловать, {username}\\!'
+CHALLENGE_FAIL_MESSAGE = 'Фатальная ошибка\\! Лови BANAN 🍌'
 
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
@@ -75,55 +76,59 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     was_member, is_member = result
-    
+
     # Verifying the user is a new member
     if was_member or not is_member:
         return
-    
+
     user = update.chat_member.new_chat_member.user
-    chat_id = update.effective_chat.id
 
     if DARKBYTE_ENABLED:
-      response = httpx.get(f"https://spam.darkbyte.ru/?a={user.id}")
-      data = response.json()
-      should_ban = data["banned"] or data["spam_factor"] > 30
-      message = f"`{response.content.decode()}` \\=\\> {should_ban}"
-      await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
+        response = httpx.get(f"https://spam.darkbyte.ru/?a={user.id}")
+        data = response.json()
+        should_ban = data["banned"] or data["spam_factor"] > 30
+        message = f"`{response.content.decode()}` \\=\\> {should_ban}"
+        await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
-      if should_ban:
-          if BAN_ENABLED:
-            await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
-          return
-    
+        if should_ban:
+            if BAN_ENABLED:
+                await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
+            return
+
     challenge_text = random.choice(list(EMOJI.keys()))
 
-    message = GREETING_MESSAGE_TEMPLATE.format(username=user.username, 
+    message = GREETING_MESSAGE_TEMPLATE.format(username=get_md_user_name(user),
                                                challenge_text=challenge_text,
                                                timeout=BAN_TIMEOUT_SECONDS)
 
     sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
-    CHECKING_MEMBERS[f'{user.id}_{chat_id}'] = {
-       'message_id': sent_msg.id, 
-       'emoji': EMOJI[challenge_text],
+    CHECKING_MEMBERS[user.id] = {
+        'message_id': sent_msg.id,
+        'emoji': EMOJI[challenge_text],
     }
 
-    context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS, 
-                               user_id=user.id, 
-                               chat_id=chat_id, 
-                               data={'username': user.username})
+    context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS,
+                               user_id=user.id,
+                               chat_id=update.effective_chat.id,
+                               data={'id': user.id,
+                                     'username': user.username,
+                                     'first_name': user.first_name})
 
 
 async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
-    key =f'{context.job.user_id}_{context.job.chat_id}'
-    if key in CHECKING_MEMBERS:
-      await context.bot.send_message(chat_id=context.job.chat_id,
-                                     text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(username=context.job.data['username']))
-      if BAN_ENABLED:
-        await context.bot.ban_chat_member(chat_id=context.job.chat_id,
-                                          user_id=context.job.user_id, 
-                                          revoke_messages=True)
+    if context.job.user_id in CHECKING_MEMBERS:
+        await context.bot.send_message(chat_id=context.job.chat_id,
+                                       text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(
+                                           username=get_md_user_name(context.job.data)),
+                                       parse_mode=ParseMode.MARKDOWN_V2
+                                       )
+        if BAN_ENABLED:
+            await context.bot.ban_chat_member(chat_id=context.job.chat_id,
+                                              user_id=context.job.user_id,
+                                              revoke_messages=True)
     else:
-      await context.bot.send_message(chat_id=context.job.chat_id, 
-                                     text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(username=context.job.data['username']))
-      
+        await context.bot.send_message(chat_id=context.job.chat_id,
+                                       text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(
+                                           username=get_md_user_name(context.job.data)),
+                                       parse_mode=ParseMode.MARKDOWN_V2)
