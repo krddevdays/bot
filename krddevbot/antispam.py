@@ -7,7 +7,7 @@ from telegram.constants import ParseMode
 
 from telegram.ext import ContextTypes
 
-from krddevbot.service import get_user_name
+from krddevbot.service import get_md_user_name
 
 # Feature Flags Inc. & Config Brothers
 DARKBYTE_ENABLED = True
@@ -97,7 +97,7 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     challenge_text = random.choice(list(EMOJI.keys()))
 
-    message = GREETING_MESSAGE_TEMPLATE.format(username=get_user_name(user),
+    message = GREETING_MESSAGE_TEMPLATE.format(username=get_md_user_name(user),
                                                challenge_text=challenge_text,
                                                timeout=BAN_TIMEOUT_SECONDS)
 
@@ -120,7 +120,7 @@ async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     if context.job.user_id in CHECKING_MEMBERS:
         await context.bot.send_message(chat_id=context.job.chat_id,
                                        text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(
-                                           username=get_user_name(context.job.data)),
+                                           username=get_md_user_name(context.job.data)),
                                        parse_mode=ParseMode.MARKDOWN_V2
                                        )
         if BAN_ENABLED:
@@ -130,5 +130,5 @@ async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     else:
         await context.bot.send_message(chat_id=context.job.chat_id,
                                        text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(
-                                           username=get_user_name(context.job.data)),
+                                           username=get_md_user_name(context.job.data)),
                                        parse_mode=ParseMode.MARKDOWN_V2)

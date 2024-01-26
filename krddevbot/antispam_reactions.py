@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
 from krddevbot.antispam import CHECKING_MEMBERS, BAN_ENABLED, CHALLENGE_OK_MESSAGE_TEMPLATE, CHALLENGE_FAIL_MESSAGE
-from krddevbot.service import get_user_name
+from krddevbot.service import get_md_user_name
 
 
 async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -23,7 +23,7 @@ async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFA
 
     user = msg.get('user', {})
     user_id = user.get('id', 0)
-    username = get_user_name(user)
+    username = get_md_user_name(user)
     emoji = reaction.get('emoji', '')
     challenge = CHECKING_MEMBERS.get(user_id)
     if not challenge:
