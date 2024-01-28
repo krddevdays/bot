@@ -16,6 +16,7 @@ from krddevbot.message_formatter import md
 
 logger = logging.getLogger(__name__)
 
+
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
     of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
@@ -56,7 +57,7 @@ async def emoji_challenge(context, user, chat):
     sent_msg = await chat.send_message(
         md(
             GREETING_MESSAGE_TEMPLATE,
-            username=user,
+            user=user,
             challenge_text=challenge_text,
             timeout=settings.EMOJI_TIMEOUT_SECONDS
         ),
@@ -72,11 +73,7 @@ async def emoji_challenge(context, user, chat):
         user_id=user.id,
         chat_id=chat.id,
         message_id=sent_msg.id,
-        data={
-            'id': user.id,
-            'username': user.username,
-            'first_name': user.first_name
-        }
+        data=user.to_dict()
     )
 
 
@@ -107,7 +104,7 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     if key in CHECKING_MEMBERS:
         await context.bot.send_message(
             chat_id=context.job.chat_id,
-            text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, username=context.job.data),
+            text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=context.job.data),
             parse_mode=ParseMode.MARKDOWN_V2
         )
         await context.bot.delete_message(chat_id=context.job.chat_id, message_id=context.job.message_id)
@@ -126,6 +123,6 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     else:
         await context.bot.send_message(
             chat_id=context.job.chat_id,
-            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, username=context.job.data),
+            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=context.job.data),
             parse_mode=ParseMode.MARKDOWN_V2
         )

@@ -1,18 +1,20 @@
+from typing import Optional
+
 from telegram import User
 
 
-def md(template: str, **kwargs) -> str:
-    if not isinstance(user, User):
-        user = User(
-            id=user.get('id'),
-            first_name=user.get('first_name'),
-            is_bot=user.get('is_bot'),
-            username=user.get('username')
-        )
+def md(template: str, user: Optional[dict | User] = None, **kwargs) -> str:
+    if user:
+        if not isinstance(user, User):
+            user = User(**user)
+        username = user.username
+        if not user:
+            username = user.mention_markdown_v2(user.first_name)
+        kwargs["username"] = f"@{username}"
 
-    username = user.username
-    if username:
-        username = username.replace('_', '\\_')
-        return f"@{username}"
-    else:
-        return user.mention_markdown_v2(user.first_name)
+    return template.format(**kwargs)\
+        .replace('_', '\\_')\
+        .replace('*', '\\*')\
+        .replace('[', '\\]')\
+        .replace('.', '\\.')\
+        .replace('!', '\\!')
