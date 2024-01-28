@@ -1,20 +1,17 @@
+import logging
 from typing import Optional, Tuple
 
 import httpx
 import random
 from telegram import ChatMember, ChatMemberUpdated, Update
 from telegram.constants import ParseMode
-
 from telegram.ext import ContextTypes
 
+from krddevbot import settings
 from krddevbot.service import get_md_user_name
 
-# Feature Flags Inc. & Config Brothers
-DARKBYTE_ENABLED = True
-BAN_ENABLED = True
-BAN_TIMEOUT_SECONDS = 60
+logger = logging.getLogger(__name__)
 
-# Main cluster database 100500 pods in k8s required
 CHECKING_MEMBERS = {}
 
 # Secret store
@@ -40,7 +37,7 @@ TIMEOUT_FAIL_MESSAGE_TEMPLATE = 'Timeout\\! Лови BANAN 🍌, {username}\\!'
 TIMEOUT_OK_MESSAGE_TEMPLATE = 'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, {username}\\!'
 
 CHALLENGE_OK_MESSAGE_TEMPLATE = 'Добро пожаловать, {username}\\!'
-CHALLENGE_FAIL_MESSAGE = 'Фатальная ошибка\\! Лови BANAN 🍌'
+CHALLENGE_FAIL_MESSAGE = 'Этот не подходит, попробуй другой\\.'
 
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
@@ -69,6 +66,41 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
     return was_member, is_member
 
 
+async def check_in_darkbyte(user_id):
+    response = httpx.get(f"https://spam.darkbyte.ru/?a={user_id}")
+    data = response.json()
+    should_ban = data["banned"] or data["spam_factor"] > 30
+    logger.info("%s => %s", response.content.decode(), should_ban)
+    return should_ban
+
+
+async def emoji_challenge(context, user, chat):
+    challenge_text = random.choice(list(EMOJI.keys()))
+
+    message = GREETING_MESSAGE_TEMPLATE.format(
+        username=get_md_user_name(user),
+        challenge_text=challenge_text,
+        timeout=settings.EMOJI_TIMEOUT_SECONDS
+    )
+    sent_msg = await chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
+
+    key = f'{user.id}_{chat.id}_{sent_msg.id}'
+    CHECKING_MEMBERS[key] = EMOJI[challenge_text]
+
+    context.job_queue.run_once(
+        kick_if_time_is_over,
+        settings.EMOJI_TIMEOUT_SECONDS,
+        user_id=user.id,
+        chat_id=chat.id,
+        message_id=sent_msg.id,
+        data={
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name
+        }
+    )
+
+
 async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Greets new users in chats and announces when someone leaves"""
     result = extract_status_change(update.chat_member)
@@ -83,52 +115,38 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     user = update.chat_member.new_chat_member.user
 
-    if DARKBYTE_ENABLED:
-        response = httpx.get(f"https://spam.darkbyte.ru/?a={user.id}")
-        data = response.json()
-        should_ban = data["banned"] or data["spam_factor"] > 30
-        message = f"`{response.content.decode()}` \\=\\> {should_ban}"
-        await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
-
-        if should_ban:
-            if BAN_ENABLED:
-                await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
+    if settings.DARKBYTE_ENABLED:
+        if await check_in_darkbyte(user.id):
+            await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
             return
 
-    challenge_text = random.choice(list(EMOJI.keys()))
-
-    message = GREETING_MESSAGE_TEMPLATE.format(username=get_md_user_name(user),
-                                               challenge_text=challenge_text,
-                                               timeout=BAN_TIMEOUT_SECONDS)
-
-    sent_msg = await update.effective_chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
-
-    CHECKING_MEMBERS[user.id] = {
-        'message_id': sent_msg.id,
-        'emoji': EMOJI[challenge_text],
-    }
-
-    context.job_queue.run_once(ban_if_time_is_over, BAN_TIMEOUT_SECONDS,
-                               user_id=user.id,
-                               chat_id=update.effective_chat.id,
-                               data={'id': user.id,
-                                     'username': user.username,
-                                     'first_name': user.first_name})
+    await emoji_challenge(context, user, update.effective_chat)
 
 
-async def ban_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
-    if context.job.user_id in CHECKING_MEMBERS:
-        await context.bot.send_message(chat_id=context.job.chat_id,
-                                       text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(
-                                           username=get_md_user_name(context.job.data)),
-                                       parse_mode=ParseMode.MARKDOWN_V2
-                                       )
-        if BAN_ENABLED:
-            await context.bot.ban_chat_member(chat_id=context.job.chat_id,
-                                              user_id=context.job.user_id,
-                                              revoke_messages=True)
+async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
+    key = f'{context.job.user_id}_{context.job.chat_id}_{context.job.message_id}'
+    if key in CHECKING_MEMBERS:
+        await context.bot.send_message(
+            chat_id=context.job.chat_id,
+            text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(username=get_md_user_name(context.job.data)),
+            parse_mode=ParseMode.MARKDOWN_V2
+        )
+        await context.bot.delete_message(chat_id=context.job.chat_id, message_id=context.job.message_id)
+        del CHECKING_MEMBERS[key]
+
+        # kick, not ban
+        await context.bot.ban_chat_member(
+            chat_id=context.job.chat_id,
+            user_id=context.job.user_id,
+            revoke_messages=True
+        )
+        await context.bot.unban_chat_member(
+            chat_id=context.job.chat_id,
+            user_id=context.job.user_id
+        )
     else:
-        await context.bot.send_message(chat_id=context.job.chat_id,
-                                       text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(
-                                           username=get_md_user_name(context.job.data)),
-                                       parse_mode=ParseMode.MARKDOWN_V2)
+        await context.bot.send_message(
+            chat_id=context.job.chat_id,
+            text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(username=get_md_user_name(context.job.data)),
+            parse_mode=ParseMode.MARKDOWN_V2
+        )
