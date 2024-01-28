@@ -11,7 +11,7 @@ pattern = re.compile("тандер", re.IGNORECASE | re.MULTILINE | re.UNICODE)
 
 
 async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if pattern.search(update.message.text):
+    if update.message and pattern.search(update.message.text):
         chat = update.effective_chat
         logger.debug("В группе %s (%s) вспомнили Тандер", chat.username, chat.id)
         file_path = pathlib.Path(f'tander/{abs(chat.id)}')
