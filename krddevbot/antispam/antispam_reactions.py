@@ -3,8 +3,9 @@ from telegram import Update
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
-from krddevbot.antispam import CHECKING_MEMBERS, CHALLENGE_OK_MESSAGE_TEMPLATE, CHALLENGE_FAIL_MESSAGE
-from krddevbot.service import get_md_user_name
+from .constance import CHALLENGE_OK_MESSAGE_TEMPLATE, CHALLENGE_FAIL_MESSAGE
+from .storage import CHECKING_MEMBERS
+from ..message_formatter import md
 
 
 async def antispam_reactions_checking(update: Update, new_reaction, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -16,7 +17,6 @@ async def antispam_reactions_checking(update: Update, new_reaction, context: Con
 
     user = msg.get('user', {})
     user_id = user.get('id', 0)
-    username = get_md_user_name(user)
 
     emoji = new_reaction.get('emoji', '')
     if challenge := CHECKING_MEMBERS.get(f'{user_id}_{chat_id}_{message_id}'):
@@ -25,10 +25,10 @@ async def antispam_reactions_checking(update: Update, new_reaction, context: Con
             # Remove greeting message and welcome user
             await context.bot.send_message(
                 chat_id,
-                CHALLENGE_OK_MESSAGE_TEMPLATE.format(username=username),
+                md(CHALLENGE_OK_MESSAGE_TEMPLATE, username=user),
                 parse_mode=ParseMode.MARKDOWN_V2
             )
             await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
             del CHECKING_MEMBERS[f'{user_id}_{chat_id}_{message_id}']
         else:
-            await context.bot.send_message(chat_id, CHALLENGE_FAIL_MESSAGE, parse_mode=ParseMode.MARKDOWN_V2)
+            await context.bot.send_message(chat_id, md(CHALLENGE_FAIL_MESSAGE), parse_mode=ParseMode.MARKDOWN_V2)

@@ -8,37 +8,13 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from krddevbot import settings
-from krddevbot.service import get_md_user_name
+from krddevbot.antispam.constance import EMOJI, GREETING_MESSAGE_TEMPLATE, TIMEOUT_FAIL_MESSAGE_TEMPLATE, \
+    TIMEOUT_OK_MESSAGE_TEMPLATE
+from krddevbot.antispam.storage import CHECKING_MEMBERS
+
+from krddevbot.message_formatter import md
 
 logger = logging.getLogger(__name__)
-
-CHECKING_MEMBERS = {}
-
-# Secret store
-EMOJI = {
-    "рукой": "👍👎👏🙏👌🖕🤝✍️💅",
-    "огнем": "🔥",
-    "сердцем": "❤️💘💔❤️‍🔥",
-    "лицом": "🥰😁🤔🤯😱🤬😢🤩🤮🤡🥱🥴😍🌚🤣🤨😐😈😴😭🤓😇😨🤗🎅🤪😘😎😡",
-    "животным": "🕊🐳🙈🙉🦄🙊👾☃️",
-    "едой": "🍓🌭🍌🍾💊🎃",
-}
-
-GREETING_MESSAGE_TEMPLATE = """
-Уважаемый {username}
-Добро пожаловать в чаты сообщества krd\\.dev\\!
-
-Подтвердите, что вы кожаный мешок, поставив эмодзи с {challenge_text} из стандартного набора этому сообщению\\.
-
-У вас {timeout} секунд\\.\\.\\.
-"""
-
-TIMEOUT_FAIL_MESSAGE_TEMPLATE = 'Timeout\\! Лови BANAN 🍌, {username}\\!'
-TIMEOUT_OK_MESSAGE_TEMPLATE = 'Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, {username}\\!'
-
-CHALLENGE_OK_MESSAGE_TEMPLATE = 'Добро пожаловать, {username}\\!'
-CHALLENGE_FAIL_MESSAGE = 'Этот не подходит, попробуй другой\\.'
-
 
 def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
@@ -77,12 +53,15 @@ async def check_in_darkbyte(user_id):
 async def emoji_challenge(context, user, chat):
     challenge_text = random.choice(list(EMOJI.keys()))
 
-    message = GREETING_MESSAGE_TEMPLATE.format(
-        username=get_md_user_name(user),
-        challenge_text=challenge_text,
-        timeout=settings.EMOJI_TIMEOUT_SECONDS
+    sent_msg = await chat.send_message(
+        md(
+            GREETING_MESSAGE_TEMPLATE,
+            username=user,
+            challenge_text=challenge_text,
+            timeout=settings.EMOJI_TIMEOUT_SECONDS
+        ),
+        parse_mode=ParseMode.MARKDOWN_V2
     )
-    sent_msg = await chat.send_message(message, parse_mode=ParseMode.MARKDOWN_V2)
 
     key = f'{user.id}_{chat.id}_{sent_msg.id}'
     CHECKING_MEMBERS[key] = EMOJI[challenge_text]
@@ -128,7 +107,7 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     if key in CHECKING_MEMBERS:
         await context.bot.send_message(
             chat_id=context.job.chat_id,
-            text=TIMEOUT_FAIL_MESSAGE_TEMPLATE.format(username=get_md_user_name(context.job.data)),
+            text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, username=context.job.data),
             parse_mode=ParseMode.MARKDOWN_V2
         )
         await context.bot.delete_message(chat_id=context.job.chat_id, message_id=context.job.message_id)
@@ -147,6 +126,6 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     else:
         await context.bot.send_message(
             chat_id=context.job.chat_id,
-            text=TIMEOUT_OK_MESSAGE_TEMPLATE.format(username=get_md_user_name(context.job.data)),
+            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, username=context.job.data),
             parse_mode=ParseMode.MARKDOWN_V2
         )

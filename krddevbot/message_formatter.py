@@ -1,8 +1,7 @@
-from typing import Union
 from telegram import User
 
 
-def get_md_user_name(user: Union[User, dict]) -> str:
+def md(template: str, **kwargs) -> str:
     if not isinstance(user, User):
         user = User(
             id=user.get('id'),

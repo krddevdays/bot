@@ -4,11 +4,10 @@ from telegram import Update
 from telegram.ext import Application, ChatMemberHandler, CommandHandler, ContextTypes, MessageHandler, filters
 
 from krddevbot import settings
-from krddevbot.antispam import greet_chat_members
+from krddevbot.antispam import antispam_reactions_checking, greet_chat_members
 from krddevbot.logging import init_logging
 from krddevbot.tander import days_without_mention
 from krddevbot.reactions_handler import MESSAGE_REACTION, ReactionsHandler
-from krddevbot.antispam_reactions import antispam_reactions_checking
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
