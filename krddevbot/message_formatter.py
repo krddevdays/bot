@@ -8,7 +8,7 @@ def md(template: str, user: Optional[dict | User] = None, **kwargs) -> str:
         if not isinstance(user, User):
             user = User(**user)
         username = user.username
-        if not user:
+        if not username:
             username = user.mention_markdown_v2(user.first_name)
         kwargs["username"] = f"@{username}"
 
