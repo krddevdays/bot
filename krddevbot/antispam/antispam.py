@@ -72,8 +72,10 @@ async def emoji_challenge(context, user, chat):
         settings.EMOJI_TIMEOUT_SECONDS,
         user_id=user.id,
         chat_id=chat.id,
-        message_id=sent_msg.id,
-        data=user.to_dict()
+        data={
+            "user": user.to_dict(),
+            "message_id": sent_msg.id,
+        }
     )
 
 
@@ -100,14 +102,16 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
 
 async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
-    key = f'{context.job.user_id}_{context.job.chat_id}_{context.job.message_id}'
+    message_id = context.job.data["message_id"]
+    user = context.job.data["user"]
+    key = f'{context.job.user_id}_{context.job.chat_id}_{message_id}'
     if key in CHECKING_MEMBERS:
         await context.bot.send_message(
             chat_id=context.job.chat_id,
-            text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=context.job.data),
+            text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=user),
             parse_mode=ParseMode.MARKDOWN_V2
         )
-        await context.bot.delete_message(chat_id=context.job.chat_id, message_id=context.job.message_id)
+        await context.bot.delete_message(chat_id=context.job.chat_id, message_id=message_id)
         del CHECKING_MEMBERS[key]
 
         # kick, not ban
@@ -123,6 +127,6 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     else:
         await context.bot.send_message(
             chat_id=context.job.chat_id,
-            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=context.job.data),
+            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
             parse_mode=ParseMode.MARKDOWN_V2
         )
