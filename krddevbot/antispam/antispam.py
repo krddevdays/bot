@@ -42,17 +42,23 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
     return was_member, is_member
 
 
-async def check_in_darkbyte(user_id: int | str) -> bool:
+async def check_in_darkbyte(user_id: int) -> bool:
     """
     sends a request to darkbyte.
-    if the response from darkbyte has not arrived or the response code is not equal to 200,
+    if the response from darkbyte has not arrived or the response code is not equal to 200 or user_id is not int,
     it returns that the user is not banned
     """
+    if isinstance(user_id, int):
+        return False
+
     should_ban = False
     client = httpx.AsyncClient(timeout=10)
+
     try:
         response = await client.get(f"https://spam.darkbyte.ru/", params={'a': user_id})
-
+    except httpx.TransportError as e:
+        logger.error("httpx.{err_class}: cannot connect to darkbyte".format(err_class=e.__class__.__name__))
+    else:
         if response.status_code != 200:
             logger.error("darkbyte return {status} code".format(status=response.status_code))
             return should_ban
@@ -60,10 +66,6 @@ async def check_in_darkbyte(user_id: int | str) -> bool:
         data = response.json()
         should_ban = data["banned"] or data["spam_factor"] > 30
         logger.info("%s => %s", response.content.decode(), should_ban)
-    except httpx.TimeoutException:
-        logger.error("timeout waiting darkbyte")
-    except httpx.ConnectError:
-        logger.error("cannot connect to darkbyte")
 
     return should_ban
 
