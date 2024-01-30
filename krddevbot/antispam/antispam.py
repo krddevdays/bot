@@ -48,7 +48,7 @@ async def check_in_darkbyte(user_id: int) -> bool:
     if the response from darkbyte has not arrived or the response code is not equal to 200 or user_id is not int,
     it returns that the user is not banned
     """
-    if isinstance(user_id, int):
+    if not isinstance(user_id, int):
         return False
 
     should_ban = False
