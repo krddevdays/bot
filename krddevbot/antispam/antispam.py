@@ -6,6 +6,7 @@ import random
 from telegram import ChatMember, ChatMemberUpdated, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
+from telegram.helpers import escape_markdown
 
 from krddevbot import settings
 from krddevbot.antispam.constance import EMOJI, GREETING_MESSAGE_TEMPLATE, TIMEOUT_FAIL_MESSAGE_TEMPLATE, \
@@ -58,7 +59,7 @@ async def emoji_challenge(context, user, chat):
         md(
             GREETING_MESSAGE_TEMPLATE,
             user=user,
-            challenge_text=challenge_text,
+            challenge=escape_markdown(challenge_text),
             timeout=settings.EMOJI_TIMEOUT_SECONDS
         ),
         parse_mode=ParseMode.MARKDOWN_V2
