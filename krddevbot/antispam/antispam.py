@@ -1,8 +1,8 @@
 import logging
+import random
 from typing import Optional, Tuple
 
 import httpx
-import random
 from telegram import ChatMember, ChatMemberUpdated, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -11,7 +11,6 @@ from krddevbot import settings
 from krddevbot.antispam.constance import EMOJI, GREETING_MESSAGE_TEMPLATE, TIMEOUT_FAIL_MESSAGE_TEMPLATE, \
     TIMEOUT_OK_MESSAGE_TEMPLATE
 from krddevbot.antispam.storage import CHECKING_MEMBERS
-
 from krddevbot.message_formatter import md
 
 logger = logging.getLogger(__name__)
@@ -43,11 +42,31 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
     return was_member, is_member
 
 
-async def check_in_darkbyte(user_id):
-    response = httpx.get(f"https://spam.darkbyte.ru/?a={user_id}")
-    data = response.json()
-    should_ban = data["banned"] or data["spam_factor"] > 30
-    logger.info("%s => %s", response.content.decode(), should_ban)
+async def check_in_darkbyte(user_id: int) -> bool:
+    """
+    sends a request to darkbyte.
+    if the response from darkbyte has not arrived or the response code is not equal to 200 or user_id is not int,
+    it returns that the user is not banned
+    """
+    if not isinstance(user_id, int):
+        return False
+
+    should_ban = False
+    client = httpx.AsyncClient(timeout=10)
+
+    try:
+        response = await client.get(f"https://spam.darkbyte.ru/", params={'a': user_id})
+    except httpx.TransportError as e:
+        logger.error("httpx.{err_class}: cannot connect to darkbyte".format(err_class=e.__class__.__name__))
+    else:
+        if response.status_code != 200:
+            logger.error("darkbyte return {status} code".format(status=response.status_code))
+            return should_ban
+
+        data = response.json()
+        should_ban = data["banned"] or data["spam_factor"] > 30
+        logger.info("%s => %s", response.content.decode(), should_ban)
+
     return should_ban
 
 
