@@ -8,10 +8,12 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from krddevbot import settings
-from krddevbot.antispam.constance import EMOJI, GREETING_MESSAGE_TEMPLATE, TIMEOUT_FAIL_MESSAGE_TEMPLATE, \
+
+from .constance import EMOJI, GREETING_MESSAGE_TEMPLATE, TIMEOUT_FAIL_MESSAGE_TEMPLATE, \
     TIMEOUT_OK_MESSAGE_TEMPLATE
-from krddevbot.antispam.storage import CHECKING_MEMBERS
-from krddevbot.message_formatter import md
+from .storage import CHECKING_MEMBERS
+from ..message_formatter import md
+from ..message_sender import send_garbage_message
 
 logger = logging.getLogger(__name__)
 
@@ -125,7 +127,8 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     user = context.job.data["user"]
     key = f'{context.job.user_id}_{context.job.chat_id}_{message_id}'
     if key in CHECKING_MEMBERS:
-        await context.bot.send_message(
+        await send_garbage_message(
+            context,
             chat_id=context.job.chat_id,
             text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=user),
             parse_mode=ParseMode.MARKDOWN_V2
@@ -144,8 +147,10 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
             user_id=context.job.user_id
         )
     else:
-        await context.bot.send_message(
+        await send_garbage_message(
+            context,
             chat_id=context.job.chat_id,
             text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
             parse_mode=ParseMode.MARKDOWN_V2
         )
+
