@@ -22,7 +22,7 @@ class ReactionsHandler(BaseHandler[Update, CCT]):
 
     def check_update(self, update: object) -> Optional[Union[bool, Dict[str, List[Any]]]]:
         """Checking message type and has it any new reaction"""
-        if msg := update.api_kwargs.get('message_reaction'):
-            new_reaction = msg.get('new_reaction')
+        if msg := update.api_kwargs.get("message_reaction"):
+            new_reaction = msg.get("new_reaction")
             if new_reaction:
                 return new_reaction

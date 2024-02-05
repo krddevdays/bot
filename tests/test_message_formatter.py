@@ -14,6 +14,6 @@ def test_md(has_username):
     result = md(TEMPLATE, user)
     print(result)
 
-    first_name = user['first_name'].replace(r'\_', r'\\\_')
+    first_name = user["first_name"].replace(r"\_", r"\\\_")
     expect_username = user["username"] if has_username else f"{first_name} {user['last_name']}"
     assert result == f"Hello, [{expect_username}](tg://user?id=123123) \\!"
