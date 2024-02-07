@@ -14,7 +14,7 @@ async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYP
     if update.message and pattern.search(update.message.text):
         chat = update.effective_chat
         logger.debug("В группе %s (%s) вспомнили Тандер", chat.username, chat.id)
-        file_path = pathlib.Path(f'tander/{abs(chat.id)}')
+        file_path = pathlib.Path(f"tander/{abs(chat.id)}")
         if file_path.is_file():
             diff = datetime.now(UTC) - datetime.fromtimestamp(file_path.stat().st_mtime, UTC)
             logger.debug("В последний раз это было %s назад", diff)

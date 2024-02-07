@@ -8,15 +8,23 @@ from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from krddevbot import settings
-from krddevbot.antispam.constance import EMOJI, GREETING_MESSAGE_TEMPLATE, TIMEOUT_FAIL_MESSAGE_TEMPLATE, \
-    TIMEOUT_OK_MESSAGE_TEMPLATE
-from krddevbot.antispam.storage import CHECKING_MEMBERS
-from krddevbot.message_formatter import md
+
+from .constance import (
+    EMOJI,
+    GREETING_MESSAGE_TEMPLATE,
+    TIMEOUT_FAIL_MESSAGE_TEMPLATE,
+    TIMEOUT_OK_MESSAGE_TEMPLATE,
+)
+from .storage import CHECKING_MEMBERS
+from ..message_formatter import md
+from ..message_sender import send_garbage_message
 
 logger = logging.getLogger(__name__)
 
 
-def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
+def extract_status_change(
+    chat_member_update: ChatMemberUpdated,
+) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
     of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
     the status didn't change.
@@ -55,7 +63,7 @@ async def check_in_darkbyte(user_id: int) -> bool:
     client = httpx.AsyncClient(timeout=10)
 
     try:
-        response = await client.get(f"https://spam.darkbyte.ru/", params={'a': user_id})
+        response = await client.get(f"https://spam.darkbyte.ru/", params={"a": user_id})
     except httpx.TransportError as e:
         logger.error("httpx.{err_class}: cannot connect to darkbyte".format(err_class=e.__class__.__name__))
     else:
@@ -73,17 +81,20 @@ async def check_in_darkbyte(user_id: int) -> bool:
 async def emoji_challenge(context, user, chat):
     challenge_text = random.choice(list(EMOJI.keys()))
 
-    sent_msg = await chat.send_message(
-        md(
+    sent_msg = await send_garbage_message(
+        context,
+        chat_id=chat.id,
+        text=md(
             GREETING_MESSAGE_TEMPLATE,
             user=user,
             challenge_text=challenge_text,
-            timeout=settings.EMOJI_TIMEOUT_SECONDS
+            timeout=settings.EMOJI_TIMEOUT_SECONDS,
         ),
-        parse_mode=ParseMode.MARKDOWN_V2
+        parse_mode=ParseMode.MARKDOWN_V2,
+        message_timeout_seconds=settings.EMOJI_TIMEOUT_SECONDS,
     )
 
-    key = f'{user.id}_{chat.id}_{sent_msg.id}'
+    key = f"{user.id}_{chat.id}_{sent_msg.id}"
     CHECKING_MEMBERS[key] = EMOJI[challenge_text]
 
     context.job_queue.run_once(
@@ -94,7 +105,7 @@ async def emoji_challenge(context, user, chat):
         data={
             "user": user.to_dict(),
             "message_id": sent_msg.id,
-        }
+        },
     )
 
 
@@ -123,29 +134,33 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     message_id = context.job.data["message_id"]
     user = context.job.data["user"]
-    key = f'{context.job.user_id}_{context.job.chat_id}_{message_id}'
+
+    key = f"{context.job.user_id}_{context.job.chat_id}_{message_id}"
+
     if key in CHECKING_MEMBERS:
-        await context.bot.send_message(
+        del CHECKING_MEMBERS[key]
+
+        # User reaction on message is timed out
+        await send_garbage_message(
+            context,
             chat_id=context.job.chat_id,
             text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=user),
-            parse_mode=ParseMode.MARKDOWN_V2
+            parse_mode=ParseMode.MARKDOWN_V2,
         )
-        await context.bot.delete_message(chat_id=context.job.chat_id, message_id=message_id)
-        del CHECKING_MEMBERS[key]
 
         # kick, not ban
         await context.bot.ban_chat_member(
             chat_id=context.job.chat_id,
             user_id=context.job.user_id,
-            revoke_messages=True
+            revoke_messages=True,
         )
-        await context.bot.unban_chat_member(
-            chat_id=context.job.chat_id,
-            user_id=context.job.user_id
-        )
-    else:
-        await context.bot.send_message(
-            chat_id=context.job.chat_id,
-            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
-            parse_mode=ParseMode.MARKDOWN_V2
-        )
+        await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id)
+        return
+
+    # OK
+    await send_garbage_message(
+        context,
+        chat_id=context.job.chat_id,
+        text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
+        parse_mode=ParseMode.MARKDOWN_V2,
+    )
