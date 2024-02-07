@@ -1,9 +1,14 @@
+import logging
+
 from functools import partial
 
 from telegram import Message
 from telegram.ext import ContextTypes
+from telegram.error import TelegramError
 
 from krddevbot import settings
+
+logger = logging.getLogger(__name__)
 
 
 def job(context: ContextTypes.DEFAULT_TYPE, message: Message):
@@ -17,4 +22,10 @@ def job(context: ContextTypes.DEFAULT_TYPE, message: Message):
 
 async def _gc_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int):
     """Remove garbage message from chat"""
-    await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+    try:
+        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+    except TelegramError as exc:
+        if exc.message == "Message to delete not found":
+            logger.info(f"{exc.message} chat_id={chat_id} message_id={message_id}")
+        else:
+            raise exc
