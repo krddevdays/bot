@@ -29,15 +29,15 @@ async def antispam_reactions_checking(update: Update, new_reactions, context: Co
 
                 await send_garbage_message(
                     context,
-                    chat_id,
-                    md(CHALLENGE_OK_MESSAGE_TEMPLATE, user=user),
+                    chat_id=chat_id,
+                    text=md(CHALLENGE_OK_MESSAGE_TEMPLATE, user=user),
                     parse_mode=ParseMode.MARKDOWN_V2,
                 )
                 break
         else:
             await send_garbage_message(
                 context,
-                chat_id,
-                md(CHALLENGE_FAIL_MESSAGE),
+                chat_id=chat_id,
+                text=md(CHALLENGE_FAIL_MESSAGE),
                 parse_mode=ParseMode.MARKDOWN_V2,
             )

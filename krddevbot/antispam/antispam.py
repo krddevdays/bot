@@ -81,14 +81,17 @@ async def check_in_darkbyte(user_id: int) -> bool:
 async def emoji_challenge(context, user, chat):
     challenge_text = random.choice(list(EMOJI.keys()))
 
-    sent_msg = await chat.send_message(
-        md(
+    sent_msg = await send_garbage_message(
+        context,
+        chat_id=chat.id,
+        text=md(
             GREETING_MESSAGE_TEMPLATE,
             user=user,
             challenge_text=challenge_text,
             timeout=settings.EMOJI_TIMEOUT_SECONDS,
         ),
         parse_mode=ParseMode.MARKDOWN_V2,
+        message_timeout_seconds=settings.EMOJI_TIMEOUT_SECONDS,
     )
 
     key = f"{user.id}_{chat.id}_{sent_msg.id}"
@@ -131,16 +134,19 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
     message_id = context.job.data["message_id"]
     user = context.job.data["user"]
+
     key = f"{context.job.user_id}_{context.job.chat_id}_{message_id}"
+
     if key in CHECKING_MEMBERS:
+        del CHECKING_MEMBERS[key]
+
+        # User reaction on message is timed out
         await send_garbage_message(
             context,
             chat_id=context.job.chat_id,
             text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=user),
             parse_mode=ParseMode.MARKDOWN_V2,
         )
-        await context.bot.delete_message(chat_id=context.job.chat_id, message_id=message_id)
-        del CHECKING_MEMBERS[key]
 
         # kick, not ban
         await context.bot.ban_chat_member(
@@ -149,10 +155,12 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
             revoke_messages=True,
         )
         await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id)
-    else:
-        await send_garbage_message(
-            context,
-            chat_id=context.job.chat_id,
-            text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
+        return
+
+    # OK
+    await send_garbage_message(
+        context,
+        chat_id=context.job.chat_id,
+        text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
+        parse_mode=ParseMode.MARKDOWN_V2,
+    )

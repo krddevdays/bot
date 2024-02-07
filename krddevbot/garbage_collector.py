@@ -11,12 +11,12 @@ from krddevbot import settings
 logger = logging.getLogger(__name__)
 
 
-def job(context: ContextTypes.DEFAULT_TYPE, message: Message):
+def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_seconds: int):
     """Creates new job for run garbage collector task with specified message after timeout"""
     context.job_queue.run_once(
         callback=partial(_gc_task, chat_id=message.chat_id, message_id=message.message_id),
-        when=settings.GARBAGE_COLLECTOR_RUN_TASK_SECONDS,
-        name=f"_gc_task_{message.chat_id}_{message.message_id}",
+        when=message_timeout_seconds,
+        name=f"_gc_task_{message.chat_id}_{message.message_id}_{message_timeout_seconds}s",
     )
 
 
