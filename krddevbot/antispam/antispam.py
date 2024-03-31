@@ -50,11 +50,11 @@ def extract_status_change(
     return was_member, is_member
 
 
-async def check_in_darkbyte(user_id: int) -> bool:
+async def check_in_lols_bot(user_id: int) -> bool:
     """
-    sends a request to darkbyte.
-    if the response from darkbyte has not arrived or the response code is not equal to 200 or user_id is not int,
-    it returns that the user is not banned
+    Sends a request to lols bot.
+    If the response from lols bot has not arrived or the response code is not equal to 200 or user_id is not int,
+    It returns that the user is not banned.
     """
     if not isinstance(user_id, int):
         return False
@@ -63,12 +63,12 @@ async def check_in_darkbyte(user_id: int) -> bool:
     client = httpx.AsyncClient(timeout=10)
 
     try:
-        response = await client.get(f"https://spam.darkbyte.ru/", params={"a": user_id})
+        response = await client.get(f"https://lols.bot/", params={"a": user_id})
     except httpx.TransportError as e:
-        logger.error("httpx.{err_class}: cannot connect to darkbyte".format(err_class=e.__class__.__name__))
+        logger.error("httpx.{err_class}: cannot connect to lols bot".format(err_class=e.__class__.__name__))
     else:
         if response.status_code != 200:
-            logger.error("darkbyte return {status} code".format(status=response.status_code))
+            logger.error("lols bot return {status} code".format(status=response.status_code))
             return should_ban
 
         data = response.json()
@@ -123,8 +123,8 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     user = update.chat_member.new_chat_member.user
 
-    if settings.DARKBYTE_ENABLED:
-        if await check_in_darkbyte(user.id):
+    if settings.LOLS_BOT_ENABLED:
+        if await check_in_lols_bot(user.id):
             await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
             return
 
