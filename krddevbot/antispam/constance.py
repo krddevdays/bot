@@ -17,8 +17,8 @@ GREETING_MESSAGE_TEMPLATE = """
 У вас {timeout} секунд...
 """
 
-TIMEOUT_FAIL_MESSAGE_TEMPLATE = "Timeout! Лови BANAN 🍌, {username}!"
-TIMEOUT_OK_MESSAGE_TEMPLATE = "Проверка пройдена успешно 👍, просьба не сорить и убирать за собой, {username}!"
+TIMEOUT_FAIL_MESSAGE_TEMPLATE = "Status: 408 Request Timeout - Лови BANAN 🍌, {username}!"
+
+CHALLENGE_FAIL_MESSAGE = "Этот не подходит, попробуй другой."
 
 CHALLENGE_OK_MESSAGE_TEMPLATE = "Добро пожаловать, {username}!"
-CHALLENGE_FAIL_MESSAGE = "Этот не подходит, попробуй другой."

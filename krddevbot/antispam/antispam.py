@@ -13,7 +13,6 @@ from .constance import (
     EMOJI,
     GREETING_MESSAGE_TEMPLATE,
     TIMEOUT_FAIL_MESSAGE_TEMPLATE,
-    TIMEOUT_OK_MESSAGE_TEMPLATE,
 )
 from .storage import CHECKING_MEMBERS
 from ..message_formatter import md
@@ -137,30 +136,23 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
 
     key = f"{context.job.user_id}_{context.job.chat_id}_{message_id}"
 
-    if key in CHECKING_MEMBERS:
-        del CHECKING_MEMBERS[key]
-
-        # User reaction on message is timed out
-        await send_garbage_message(
-            context,
-            chat_id=context.job.chat_id,
-            text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=user),
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
-
-        # kick, not ban
-        await context.bot.ban_chat_member(
-            chat_id=context.job.chat_id,
-            user_id=context.job.user_id,
-            revoke_messages=True,
-        )
-        await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id)
+    if key not in CHECKING_MEMBERS:
         return
 
-    # OK
+    del CHECKING_MEMBERS[key]
+
+    # User reaction on message is timed out
     await send_garbage_message(
         context,
         chat_id=context.job.chat_id,
-        text=md(TIMEOUT_OK_MESSAGE_TEMPLATE, user=user),
+        text=md(TIMEOUT_FAIL_MESSAGE_TEMPLATE, user=user),
         parse_mode=ParseMode.MARKDOWN_V2,
     )
+
+    # kick, not ban
+    await context.bot.ban_chat_member(
+        chat_id=context.job.chat_id,
+        user_id=context.job.user_id,
+        revoke_messages=True,
+    )
+    await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id)
