@@ -6,7 +6,7 @@ from functools import partial
 
 from telegram import Message
 from telegram.ext import ContextTypes
-from telegram.error import TelegramError
+from telegram.error import TelegramError, TimedOut
 
 from krddevbot import settings
 
@@ -71,14 +71,18 @@ def _restore_gc_jobs():
 
 
 def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_seconds: int):
+    _job(context, message.chat_id, message.message_id, message_timeout_seconds)
+
+
+def _job(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int, message_timeout_seconds: int):
     """Creates new job for run garbage collector task with specified message after timeout"""
 
-    _save_gc_job(chat_id=message.chat_id, message_id=message.message_id)
+    _save_gc_job(chat_id, message_id)
 
     context.job_queue.run_once(
-        callback=partial(_gc_task, chat_id=message.chat_id, message_id=message.message_id),
+        callback=partial(_gc_task, chat_id=chat_id, message_id=message_id),
         when=message_timeout_seconds,
-        name=f"_gc_task_{message.chat_id}_{message.message_id}_{message_timeout_seconds}s",
+        name=f"_gc_task_{chat_id}_{message_id}_{message_timeout_seconds}s",
     )
 
 
@@ -86,9 +90,16 @@ async def _gc_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id:
     """Remove garbage message from chat"""
     try:
         await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-        _remove_gc_job(chat_id=chat_id, message_id=message_id)
+    except TimedOut as exc:
+        logger.error(f"_gc_task: {exc.message}: chat_id={chat_id} message_id={message_id}")
+
+        # add job for retry delete message
+        _job(context, chat_id, message_id, settings.GARBAGE_MESSAGE_RETRY_TIMEOUT_SECONDS)
+        return
     except TelegramError as exc:
         if exc.message == "Message to delete not found":
-            logger.info(f"{exc.message} chat_id={chat_id} message_id={message_id}")
+            logger.info(f"_gc_task: {exc.message} chat_id={chat_id} message_id={message_id}")
         else:
             raise exc
+
+    _remove_gc_job(chat_id=chat_id, message_id=message_id)
