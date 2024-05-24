@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import asyncio
 
 from telegram import Update
 from telegram.constants import ParseMode
@@ -17,7 +18,7 @@ from krddevbot.antispam import antispam_reactions_checking, greet_chat_members
 from krddevbot.logging import init_logging
 from krddevbot.message_formatter import md
 from krddevbot.tander import days_without_mention
-
+from krddevbot.garbage_collector import init_garbage_collector
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /ping is issued."""
@@ -30,6 +31,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 if __name__ == "__main__":
     init_logging()
     application = Application.builder().token(settings.BOT_TOKEN).build()
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    loop.run_until_complete(init_garbage_collector(application))
 
     application.add_handler(CommandHandler("ping", help_command))
     application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))

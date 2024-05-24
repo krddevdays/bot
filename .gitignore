@@ -8,3 +8,5 @@ __pypackages__/
 tmp/
 
 .env
+
+gc-jobs-backup.json
