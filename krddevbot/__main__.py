@@ -29,7 +29,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 if __name__ == "__main__":
     init_logging()
-    application = Application.builder().token(settings.BOT_TOKEN).build()
+
+    application = Application.builder().token(settings.BOT_TOKEN)
+    application = application.read_timeout(settings.BOT_READ_WRITE_TIMEOUT_SECONDS)
+    application = application.write_timeout(settings.BOT_READ_WRITE_TIMEOUT_SECONDS)
+    application = application.build()
 
     application.add_handler(CommandHandler("ping", help_command))
     application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
