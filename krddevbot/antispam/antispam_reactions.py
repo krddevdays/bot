@@ -6,7 +6,8 @@ from telegram.constants import ParseMode
 from .constance import CHALLENGE_OK_MESSAGE_TEMPLATE, CHALLENGE_FAIL_MESSAGE
 from .storage import CHECKING_MEMBERS
 from ..message_formatter import md
-from ..message_sender import send_garbage_message
+from ..garbage_collector import send_garbage_message
+from ..message_api import delete_simple_message
 
 
 async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -22,7 +23,7 @@ async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFA
         for reaction in new_reactions:
             if reaction.emoji in challenge:
                 # Remove greeting message and welcome user
-                await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
+                await delete_simple_message(context, chat_id=chat_id, message_id=message_id)
                 del CHECKING_MEMBERS[f"{user.id}_{chat_id}_{message_id}"]
 
                 await send_garbage_message(

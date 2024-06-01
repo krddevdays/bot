@@ -16,7 +16,7 @@ from .constance import (
 )
 from .storage import CHECKING_MEMBERS
 from ..message_formatter import md
-from ..message_sender import send_garbage_message
+from ..garbage_collector import send_garbage_message
 
 logger = logging.getLogger(__name__)
 

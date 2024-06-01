@@ -4,11 +4,19 @@ from functools import partial
 
 from telegram import Message
 from telegram.ext import ContextTypes
-from telegram.error import TelegramError
 
 from krddevbot import settings
+from krddevbot.message_api import send_simple_message, delete_simple_message
 
 logger = logging.getLogger(__name__)
+
+
+async def send_garbage_message(context: ContextTypes.DEFAULT_TYPE, message_timeout_seconds=settings.GARBAGE_MESSAGE_TIMEOUT_SECONDS, **kwargs) -> Message:
+    message = await send_simple_message(context, **kwargs)
+
+    job(context, message, message_timeout_seconds)
+
+    return message
 
 
 def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_seconds: int):
@@ -22,10 +30,4 @@ def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_se
 
 async def _gc_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int):
     """Remove garbage message from chat"""
-    try:
-        await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
-    except TelegramError as exc:
-        if exc.message == "Message to delete not found":
-            logger.info(f"{exc.message} chat_id={chat_id} message_id={message_id}")
-        else:
-            raise exc
+    await delete_simple_message(context, chat_id=chat_id, message_id=message_id + message_id)
