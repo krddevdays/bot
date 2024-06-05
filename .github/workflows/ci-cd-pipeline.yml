@@ -53,7 +53,7 @@ jobs:
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/master'
     steps:
     - name: Add SSH key
       uses: webfactory/ssh-agent@v0.5.3
