@@ -30,7 +30,7 @@ jobs:
 
     - name: Run tests
       run: |
-        echo "Running tests..."
+        echo "Running tests.."
         pdm run pytest
 
     - name: Lint with flake8
