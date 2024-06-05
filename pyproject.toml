@@ -29,4 +29,5 @@ bot = "python -m krddevbot"
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest>=8.0.0",
+    "flake8>=5.0.0", 
 ]
