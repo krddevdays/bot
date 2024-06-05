@@ -22,7 +22,7 @@ TIMEOUT_FAIL_MESSAGE_TEMPLATE = "📦 Status: 408 Request Timeout - Лови BAN
 
 CHALLENGE_FAIL_MESSAGE = "😡 Этот не подходит, попробуй другой."
 
-CHALLENGE_OK_MESSAGE_TEMPLATE = """👋 Добро пожаловать в чат сообщества krd.dev, {username}!
+CHALLENGE_OK_MESSAGE_TEMPLATE = """👋 testДобро пожаловать в чат сообщества krd.dev, {username}!
 
 💬 Помимо этого чата у нас есть другие, по интересам:
 - @krdfrontend для frontend разработчиков;
