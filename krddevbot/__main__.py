@@ -22,7 +22,7 @@ from krddevbot.tander import days_without_mention
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /ping is issued."""
     await update.message.reply_text(
-        md("I'm alive, {username}!", user=update.effective_user),
+        md("I'm alive, {username}!!!", user=update.effective_user),
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
