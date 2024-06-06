@@ -19,6 +19,7 @@ from krddevbot.logging import init_logging
 from krddevbot.message_formatter import md
 from krddevbot.tander import days_without_mention
 
+
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /ping is issued."""
     env_vars = os.environ
