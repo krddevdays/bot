@@ -33,6 +33,14 @@ jobs:
         echo "Running tests.."
         pdm run pytest
 
+    - name: Copy secrets from server
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/babbage/tasks/cicd/.env" > .env
+
+    - name: Load secrets
+      run: |
+        export $(cat .env | xargs)
+
     - name: Lint with flake8
       run: |
         pdm run flake8 .    
@@ -49,6 +57,7 @@ jobs:
       run: |
         podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
         podman push docker.io/drozdovnikolai/telegram-bot:latest
+
 
   deploy:
     needs: build-and-test
@@ -67,5 +76,4 @@ jobs:
         podman rm telegram_bot || true
         podman pull docker.io/drozdovnikolai/telegram-bot:latest
         podman run -d --name telegram_bot --network="host" -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} -e SENTRY_DSN=${{ secrets.SENTRY_DSN }} docker.io/drozdovnikolai/telegram-bot:latest
-        -v /home/babbage/tasks/cicd/config.py:/app/config.py docker.io/drozdovnikolai/telegram-bot:latest
         EOF

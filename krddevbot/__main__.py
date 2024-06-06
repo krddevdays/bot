@@ -11,7 +11,6 @@ from telegram.ext import (
     MessageReactionHandler,
     filters,
 )
-import configparser
 
 from krddevbot import settings
 from krddevbot.antispam import antispam_reactions_checking, greet_chat_members
@@ -22,11 +21,8 @@ from krddevbot.tander import days_without_mention
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /ping is issued."""
-    config = configparser.ConfigParser()
-    config.read('config.py')
-    secret1_value = config['DEFAULT']['SECRET1']
     await update.message.reply_text(
-        md(f"I'm alive, {update.effective_user.username}!!!\n\nSECRET1: {secret1_value}", user=update.effective_user),
+        md(f"I'm alive, {update.effective_user.username}!", user=update.effective_user),
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
