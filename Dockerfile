@@ -6,6 +6,7 @@ WORKDIR /app
 
 # Копируйте файлы проекта в контейнер
 COPY . /app
+COPY config.py .
 
 # Установите любые необходимые пакеты, указанные в файле requirements.txt
 RUN pip install --no-cache-dir pdm
