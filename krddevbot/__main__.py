@@ -13,27 +13,18 @@ from telegram.ext import (
 )
 import os
 
-
 from krddevbot import settings
 from krddevbot.antispam import antispam_reactions_checking, greet_chat_members
 from krddevbot.logging import init_logging
 from krddevbot.message_formatter import md
 from krddevbot.tander import days_without_mention
 
-
-
-
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /ping is issued."""
-
     env_vars = os.environ
-
     env_output = "\n".join(f"{name}: {value}" for name, value in env_vars.items())
-
     await update.message.reply_text(
-
         md(f"I'm alive, {update.effective_user.username}!!!\n\nEnvironment variables:\n{env_output}", user=update.effective_user),
-
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
