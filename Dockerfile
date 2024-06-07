@@ -30,8 +30,8 @@
     # Устанавливаем права на выполнение для всех файлов в /app/.venv/bin
     RUN chmod -R +x /app/.venv/bin
     
-    # Создаем символическую ссылку на системный Python
-    RUN ln -s /usr/local/bin/python /app/.venv/bin/python
+    # Проверяем, существует ли символическая ссылка, прежде чем создавать её
+    RUN if [ ! -f /app/.venv/bin/python ]; then ln -s /usr/local/bin/python /app/.venv/bin/python; fi
     
     # Устанавливаем переменные окружения для PDM
     ENV VIRTUAL_ENV=/app/.venv
