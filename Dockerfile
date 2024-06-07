@@ -11,8 +11,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/krddevbot /app/krddevbot
-COPY --from=builder /app/krddevbot/__main__.py /app/
+RUN pip install --no-cache-dir pdm
 
-# Указываем точку входа
-CMD ["python", "/app/__main__.py"]
+COPY --from=builder /app /app
