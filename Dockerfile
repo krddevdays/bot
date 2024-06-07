@@ -10,8 +10,8 @@ COPY pyproject.toml pdm.lock /app/
 RUN pip install --no-cache-dir pdm \
     && pdm install --prod --no-lock --no-editable
 
-# Проверяем, что зависимости установлены
-RUN ls /app/__pypackages__
+# Проверяем, где устанавливаются зависимости
+RUN find /app
 
 # Второй этап: финальный образ
 FROM python:3.11-slim
