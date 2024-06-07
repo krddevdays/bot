@@ -20,8 +20,8 @@ jobs:
 
     - name: Run tests
       run: |
-        podman build -t my-test-image .
-        podman run --rm -v $(pwd):/app my-test-image pytest
+        echo "Running tests.."
+        PYTHONPATH=/app/.venv/lib/python3.11/site-packages pytest
 
     - name: Add SSH key
       uses: webfactory/ssh-agent@v0.5.3
