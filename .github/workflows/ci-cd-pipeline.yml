@@ -63,8 +63,9 @@ jobs:
     - name: Login to DockerHub
       env:
         DOCKER_USERNAME: ${{ env.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ env.DOCKER_PASSWORD }}
       run: |
-        echo "${{ secrets.DOCKER_PASSWORD }}" | podman login docker.io -u $DOCKER_USERNAME --password-stdin
+        echo "$DOCKER_PASSWORD" | podman login docker.io -u $DOCKER_USERNAME --password-stdin
 
     - name: Push Podman image
       run: |
