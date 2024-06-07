@@ -17,14 +17,17 @@
     
     # Копируем зависимости из стадии сборки
     COPY --from=builder /app/.venv /app/.venv
+    COPY --from=builder /usr/local/bin/pdm /usr/local/bin/pdm
     # Копируем код приложения
     COPY . /app
     
     # Устанавливаем переменную окружения для PDM
     ENV PYTHONPATH=/app/.venv/lib/python3.11/site-packages
-    
-    RUN pip install --no-cache-dir pdm
+    ENV PATH="/app/.venv/bin:$PATH"
 
+    RUN pip install --no-cache-dir pdm
+    RUN pip install --no-cache-dir packaging
+    
     # Объявляем порт, который будет прослушивать бот
     EXPOSE 8080
     
