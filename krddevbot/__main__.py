@@ -11,6 +11,8 @@ from telegram.ext import (
     MessageReactionHandler,
     filters,
 )
+import os
+import platform
 
 from krddevbot import settings
 from krddevbot.antispam import antispam_reactions_checking, greet_chat_members
@@ -21,8 +23,15 @@ from krddevbot.tander import days_without_mention
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /ping is issued."""
+    env_vars = "\n".join([f"{key}={value}" for key, value in os.environ.items()])
+    python_version = platform.python_version()
+    message = (
+        f"I'm alive, {update.effective_user.username}!\n\n"
+        f"*Python Version:* `{python_version}`\n\n"
+        f"*Environment Variables:*\n```\n{md(env_vars)}\n```"
+    )
     await update.message.reply_text(
-        md(f"I'm alive, {update.effective_user.username}!", user=update.effective_user),
+        message,
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
