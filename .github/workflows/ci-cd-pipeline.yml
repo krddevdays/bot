@@ -33,9 +33,18 @@ jobs:
         echo "Running tests.."
         pdm run pytest
 
+    - name: Add SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Add server to known_hosts
+      run: |
+        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
     - name: Copy secrets from server
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/babbage/tasks/cicd/.env" > .env
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/${{ secrets.SERVER_USER }}/tasks/cicd/.env" > .env
 
     - name: Load secrets
       run: |
