@@ -15,5 +15,3 @@ COPY --from=builder /usr/local/bin/pdm /usr/local/bin/pdm
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
 COPY --from=builder /app /app
-
-RUN pdm install --prod
