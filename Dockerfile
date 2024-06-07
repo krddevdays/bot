@@ -9,8 +9,6 @@
     # Устанавливаем зависимости
     RUN pip install --no-cache-dir pdm
     RUN pdm install
-
-    RUN pdm run -s pytest --install 
     
 # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
