@@ -3,21 +3,24 @@
 
     WORKDIR /app
     
+    # Устанавливаем PDM глобально
+    RUN pip install --no-cache-dir pdm
+    
     # Копируем только необходимые файлы для сборки зависимостей
     COPY pyproject.toml pdm.lock /app/
     
-    # Устанавливаем PDM и создаем виртуальное окружение с per-site
-    RUN pip install --no-cache-dir pdm \
-        && pdm install --no-self \
-        && pdm venv create --force
+    # Устанавливаем зависимости и создаем виртуальное окружение
+    RUN pdm install --no-self \
+        && pdm venv create /app/.venv --force
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
     
     WORKDIR /app
     
-    # Копируем виртуальное окружение из стадии сборки
+    # Копируем виртуальное окружение и PDM из стадии сборки
     COPY --from=builder /app/.venv /app/.venv
+    COPY --from=builder /usr/local/bin/pdm /usr/local/bin/pdm
     
     # Копируем код приложения
     COPY . /app
