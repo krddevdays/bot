@@ -3,17 +3,17 @@
 
     WORKDIR /app
     
-    # Устанавливаем PDM глобально
-    RUN pip install --no-cache-dir pdm
-    
     # Копируем только необходимые файлы для сборки зависимостей
     COPY pyproject.toml pdm.lock /app/
     
-    # Создаем виртуальное окружение вручную и устанавливаем зависимости
+    # Создаем виртуальное окружение и устанавливаем PDM
     RUN python -m venv /app/.venv \
         && . /app/.venv/bin/activate \
-        && /app/.venv/bin/pip install --no-cache-dir pdm \
-        && /app/.venv/bin/pdm install --no-self
+        && /app/.venv/bin/pip install --no-cache-dir pdm
+    
+    # Устанавливаем зависимости с помощью PDM
+    RUN . /app/.venv/bin/activate \
+        && /app/.venv/bin/pdm install
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
