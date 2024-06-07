@@ -49,6 +49,7 @@ jobs:
     - name: Load secrets
       run: |
         export $(cat .env | xargs)
+        echo "DOCKER_USERNAME=$(grep DOCKER_USERNAME .env | cut -d '=' -f2)" >> $GITHUB_ENV
 
     - name: Lint with flake8
       run: |
@@ -60,6 +61,8 @@ jobs:
         podman tag docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} docker.io/drozdovnikolai/telegram-bot:latest
 
     - name: Login to DockerHub
+      env:
+        DOCKER_USERNAME: ${{ env.DOCKER_USERNAME }}
       run: |
         echo "Docker Username: $DOCKER_USERNAME"
         echo "${{ secrets.DOCKER_PASSWORD }}" | podman login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
