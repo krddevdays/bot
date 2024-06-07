@@ -11,6 +11,8 @@
         && pdm install \
         && pdm venv create --force
     
+    RUN /app/.venv/bin/pip install pdm
+
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
     
