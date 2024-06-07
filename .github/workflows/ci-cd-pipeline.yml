@@ -49,6 +49,7 @@ jobs:
     - name: Load secrets
       run: |
         export $(cat .env | xargs)
+        echo "DOCKER_USERNAME=$DOCKER_USERNAME"
 
     - name: Lint with flake8
       run: |
@@ -64,7 +65,7 @@ jobs:
       env:
         DOCKER_USERNAME: $DOCKER_USERNAME
 
-        
+
     - name: Push Podman image
       run: |
         podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
