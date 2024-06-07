@@ -31,7 +31,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         f"*Environment Variables:*\n```\n{md(env_vars)}\n```"
     )
     await update.message.reply_text(
-        message,
+        md(message, user=update.effective_user),
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
