@@ -23,6 +23,8 @@
     # Устанавливаем переменную окружения для PDM
     ENV PYTHONPATH=/app/.venv/lib/python3.11/site-packages
     
+    RUN pip install --no-cache-dir pdm
+
     # Объявляем порт, который будет прослушивать бот
     EXPOSE 8080
     
