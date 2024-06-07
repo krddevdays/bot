@@ -19,8 +19,9 @@ FROM python:3.11-slim
     # Set the working directory to /app
 WORKDIR /app
 
-RUN chmod +x /app/binary
-    
     # Copy the built dependencies from the backend-builder stage
 COPY --from=0 /app ./binary
+
+RUN chmod +x ./binary
+    
 ENTRYPOINT [ "./binary" ]
