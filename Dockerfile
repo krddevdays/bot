@@ -8,14 +8,15 @@
     
     # Устанавливаем PDM и создаем виртуальное окружение
     RUN pip install --no-cache-dir pdm \
-        && pdm install
+        && pdm install \
+        && pdm venv create
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
     
     WORKDIR /app
     
-    # Копируем зависимости из стадии сборки
+    # Копируем виртуальное окружение и PDM из стадии сборки
     COPY --from=builder /app/.venv /app/.venv
     COPY --from=builder /usr/local/bin/pdm /usr/local/bin/pdm
     COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
