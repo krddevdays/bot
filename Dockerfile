@@ -4,4 +4,6 @@ WORKDIR /app
 
 COPY . /app
 
-RUN pip install -r
+RUN pip install --no-cache-dir pdm
+RUN pdm install
+
