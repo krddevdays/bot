@@ -44,7 +44,7 @@ jobs:
 
     - name: Lint with flake8
       run: |
-        pdm run flake8 .    
+        podman run --rm -v $(pwd):/app my-test-image /app/.venv/bin/python -m flake8 .
 
     - name: Build Podman image
       run: |
@@ -63,7 +63,6 @@ jobs:
         podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
         podman push docker.io/drozdovnikolai/telegram-bot:latest
 
-
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -80,5 +79,5 @@ jobs:
           podman stop telegram_bot || true
           podman rm telegram_bot || true
           podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest pdm bot
+          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest /app/.venv/bin/python -m pdm run bot
         EOF
