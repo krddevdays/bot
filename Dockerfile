@@ -9,7 +9,7 @@
     # Устанавливаем PDM и создаем виртуальное окружение
     RUN pip install --no-cache-dir pdm \
         && pdm install \
-        && pdm venv create
+        && pdm venv create --force
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
