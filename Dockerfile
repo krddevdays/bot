@@ -9,11 +9,11 @@
     # Копируем только необходимые файлы для сборки зависимостей
     COPY pyproject.toml pdm.lock /app/
     
-    # Создаем виртуальное окружение, устанавливаем PDM и зависимости
+    # Создаем виртуальное окружение, устанавливаем зависимости через PDM
     RUN python -m venv /app/.venv \
-        && /app/.venv/bin/python -m pip install --upgrade pip \
-        && /app/.venv/bin/pip install --no-cache-dir pdm \
-        && /app/.venv/bin/python -m pdm install --no-self
+        && /app/.venv/bin/pip install --upgrade pip \
+        && /app/.venv/bin/pip install pdm \
+        && /app/.venv/bin/pdm install --no-self
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
