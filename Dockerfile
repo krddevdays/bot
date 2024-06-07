@@ -3,19 +3,22 @@ FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Копируем файлы, необходимые для установки зависимостей
+# Копируем файлы для установки зависимостей
 COPY pyproject.toml pdm.lock /app/
 
 # Устанавливаем PDM и зависимости проекта
 RUN pip install --no-cache-dir pdm \
     && pdm install --prod --no-lock --no-editable
 
+# Проверяем, что зависимости установлены
+RUN ls /app/__pypackages__
+
 # Второй этап: финальный образ
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Копируем файлы приложения
+# Копируем все файлы приложения
 COPY . /app
 
 # Копируем установленные зависимости из этапа сборки
