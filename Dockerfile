@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . /app
 
 RUN pip install --no-cache-dir pdm
-RUN pdm install
+RUN pdm install --prod
 
 FROM python:3.11-slim
 
