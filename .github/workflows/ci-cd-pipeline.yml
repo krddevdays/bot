@@ -50,6 +50,7 @@ jobs:
       run: |
         export $(cat .env | xargs)
         echo "DOCKER_USERNAME=$(grep DOCKER_USERNAME .env | cut -d '=' -f2)" >> $GITHUB_ENV
+        echo "DOCKER_PASSWORD=$(grep DOCKER_PASSWORD .env | cut -d '=' -f2)" >> $GITHUB_ENV
 
     - name: Lint with flake8
       run: |
