@@ -84,5 +84,5 @@ jobs:
         podman stop telegram_bot || true
         podman rm telegram_bot || true
         podman pull docker.io/drozdovnikolai/telegram-bot:latest
-        podman run -d --name telegram_bot --network="host" -e BOT_TOKEN=${{ secrets.BOT_TOKEN }} -e SENTRY_DSN=${{ secrets.SENTRY_DSN }} docker.io/drozdovnikolai/telegram-bot:latest
+        podman run -d --name telegram_bot --network="host" -e SENTRY_DSN=${{ secrets.SENTRY_DSN }} docker.io/drozdovnikolai/telegram-bot:latest
         EOF
