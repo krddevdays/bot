@@ -17,13 +17,16 @@
     
     WORKDIR /app
     
-    # Копируем виртуальное окружение и PDM из стадии сборки
+    # Копируем виртуальное окружение из стадии сборки
+    COPY --from=builder /app/__pypackages__ /app/__pypackages__
     COPY --from=builder /app/.venv /app/.venv
-    COPY --from=builder /app /app
+    COPY --from=builder /usr/local/bin/pdm /usr/local/bin/pdm
+    
+    # Копируем код приложения
+    COPY . /app
     
     # Устанавливаем переменные окружения для PDM
-    ENV PATH="/app/.venv/bin:$PATH"
-    ENV VIRTUAL_ENV="/app/.venv"
+    ENV PATH="/app/.venv/bin:/app/__pypackages__/3.11/bin:$PATH"
     
     # Объявляем порт, который будет прослушивать бот
     EXPOSE 8080
