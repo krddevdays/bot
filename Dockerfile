@@ -31,5 +31,5 @@
     EXPOSE 8080
     
     # Запускаем бота
-    CMD ["pdm", "run", "bot"]
+    CMD ["/app/.venv/bin/pdm", "run", "bot"]
     
