@@ -63,7 +63,7 @@ jobs:
       run: |
       echo "${{ secrets.DOCKER_PASSWORD }}" | podman login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
       echo "DOCKER_USERNAME=$DOCKER_USERNAME"
-      echo "DOCKER_PASSWORD=$DOCKER_PASSWORD"
+      # echo "DOCKER_PASSWORD=$DOCKER_PASSWORD"
 
 
     - name: Push Podman image
