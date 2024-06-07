@@ -3,19 +3,17 @@
 
     WORKDIR /app
     
-    # Устанавливаем PDM глобально и выводим версию для проверки
-    RUN pip install --no-cache-dir pdm && pdm --version
+    # Устанавливаем PDM глобально
+    RUN pip install --no-cache-dir pdm
     
     # Копируем только необходимые файлы для сборки зависимостей
     COPY pyproject.toml pdm.lock /app/
     
-    # Создаем виртуальное окружение, устанавливаем PDM и зависимости, выводим их версии для проверки
+    # Создаем виртуальное окружение, устанавливаем PDM и зависимости
     RUN python -m venv /app/.venv \
         && /app/.venv/bin/python -m pip install --upgrade pip \
         && /app/.venv/bin/pip install --no-cache-dir pdm \
-        && /app/.venv/bin/pdm --version \
-        && /app/.venv/bin/pdm install --no-self \
-        && /app/.venv/bin/pip list
+        && /app/.venv/bin/python -m pdm install --no-self
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
@@ -32,6 +30,9 @@
     ENV VIRTUAL_ENV=/app/.venv
     ENV PATH="$VIRTUAL_ENV/bin:$PATH"
     
-    # Проверяем содержимое виртуального окружения и наличие pdm
-    RUN ls -al /app/.venv/bin
+    # Объявляем порт, который будет прослушивать бот
+    EXPOSE 8080
+    
+    # Запускаем бота
+    CMD ["/app/.venv/bin/python", "-m", "pdm", "run", "bot"]
     
