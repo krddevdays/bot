@@ -18,20 +18,10 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install PDM
-      run: |
-        python -m pip install --upgrade pip
-        pip install pdm
-
-    - name: Install dependencies using PDM
-      run: |
-        pdm lock
-        pdm sync
-
     - name: Run tests
       run: |
         echo "Running tests.."
-        pdm run pytest
+        PYTHONPATH=/app/.venv/lib/python3.11/site-packages pytest
 
     - name: Add SSH key
       uses: webfactory/ssh-agent@v0.5.3
