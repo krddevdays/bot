@@ -10,7 +10,7 @@ content_hash = "sha256:1c247361a673091cdf7c61d7d4f3c6f8c923cb32becafeae87ee7c360
 [[package]]
 name = "anyio"
 version = "4.2.0"
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "High level compatibility layer for multiple asynchronous event loop implementations"
 dependencies = [
     "exceptiongroup>=1.0.2; python_version < \"3.11\"",
@@ -81,7 +81,7 @@ files = [
 [[package]]
 name = "httpcore"
 version = "1.0.2"
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "A minimal low-level HTTP client."
 dependencies = [
     "certifi",
@@ -95,7 +95,7 @@ files = [
 [[package]]
 name = "httpx"
 version = "0.26.0"
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "The next generation HTTP client."
 dependencies = [
     "anyio",
@@ -142,7 +142,7 @@ files = [
 [[package]]
 name = "pluggy"
 version = "1.4.0"
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "plugin and hook calling mechanisms for python"
 files = [
     {file = "pluggy-1.4.0-py3-none-any.whl", hash = "sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981"},
@@ -184,7 +184,7 @@ files = [
 name = "python-telegram-bot"
 version = "20.8"
 extras = ["job-queue"]
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "We have made you a wrapper you can't refuse"
 dependencies = [
     "APScheduler~=3.10.4",
@@ -251,8 +251,8 @@ files = [
 [[package]]
 name = "typing-extensions"
 version = "4.9.0"
-requires_python = ">=3.10"
-summary = "Backported and Experimental Type Hints for Python 3.10+"
+requires_python = ">=3.8"
+summary = "Backported and Experimental Type Hints for Python 3.8+"
 files = [
     {file = "typing_extensions-4.9.0-py3-none-any.whl", hash = "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"},
     {file = "typing_extensions-4.9.0.tar.gz", hash = "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783"},
@@ -271,7 +271,7 @@ files = [
 [[package]]
 name = "tzlocal"
 version = "5.2"
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "tzinfo object for the local timezone"
 dependencies = [
     "tzdata; platform_system == \"Windows\"",
@@ -284,7 +284,7 @@ files = [
 [[package]]
 name = "urllib3"
 version = "2.2.0"
-requires_python = ">=3.10"
+requires_python = ">=3.8"
 summary = "HTTP library with thread-safe connection pooling, file post, and more."
 files = [
     {file = "urllib3-2.2.0-py3-none-any.whl", hash = "sha256:ce3711610ddce217e6d113a2732fafad960a03fd0318c91faa79481e35c11224"},
