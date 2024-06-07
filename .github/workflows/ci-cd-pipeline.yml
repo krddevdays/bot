@@ -33,11 +33,6 @@ jobs:
         echo "Running tests.."
         pdm run pytest
 
-    - name: Run PDM Bot
-      run: |
-        echo "Running PDM bot.."
-        pdm bot
-
     - name: Add SSH key
       uses: webfactory/ssh-agent@v0.5.3
       with:
