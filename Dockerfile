@@ -11,7 +11,6 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/krddevbot /app/krddevbot
+RUN pip install --no-cache-dir pdm
 
-# Запускаем бота напрямую:
-CMD ["python", "-m", "krddevbot"]
+COPY --from=builder /app /app

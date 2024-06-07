@@ -18,6 +18,10 @@ Homepage = "https://t.me/krddevdays_chat"
 Repository = "https://github.com/krddevdays/bot"
 
 [project.scripts]
+pdm = "pdm.core:main"
+
+[tool.pdm.scripts]
+_.env_file = ".env"
 bot = "python -m krddevbot"  
 
 # dev run: nodemon -e py --exec pdm run bot
