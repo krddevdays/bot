@@ -60,8 +60,10 @@ jobs:
         podman tag docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} docker.io/drozdovnikolai/telegram-bot:latest
 
     - name: Login to DockerHub
-      run: echo "${{ secrets.DOCKER_PASSWORD }}" | podman login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-
+      run: echo "$DOCKER_PASSWORD" | podman login docker.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+      env:
+        DOCKER_PASSWORD: $DOCKER_PASSWORD
+        
     - name: Push Podman image
       run: |
         podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
