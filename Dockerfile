@@ -11,5 +11,8 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+RUN pip install --no-cache-dir pdm
+
 COPY --from=builder /app /app
-COPY --from=builder /usr/local/bin/pdm /usr/local/bin/pdm
+
+RUN ls -la /app
