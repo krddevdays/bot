@@ -10,7 +10,7 @@
     COPY pyproject.toml pdm.lock /app/
     
     # Создаем виртуальное окружение, устанавливаем зависимости и проверяем PDM 
-    RUN python -m venv /app/.venv \
+    RUN python -m venv /app/.venv --copies \
         && /app/.venv/bin/python -m pip install --upgrade pip \
         && /app/.venv/bin/pip install --no-cache-dir pdm \
         && /app/.venv/bin/python -m pdm install --no-self \
