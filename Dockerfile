@@ -30,6 +30,10 @@
     ENV VIRTUAL_ENV=/app/.venv
     ENV PATH="$VIRTUAL_ENV/bin:$PATH"
     
+    # Проверяем наличие исполняемого файла pdm
+    RUN ls -al /app/.venv/bin \
+        && echo $PATH
+    
     # Объявляем порт, который будет прослушивать бот
     EXPOSE 8080
     
