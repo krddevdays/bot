@@ -18,6 +18,11 @@ jobs:
       with:
         python-version: '3.11'
 
+    - name: Install PDM
+      run: |
+        python -m pip install --upgrade pip
+        pip install pdm
+
     - name: Install dependencies using PDM
       run: |
         pdm lock
@@ -85,5 +90,5 @@ jobs:
           podman stop telegram_bot || true
           podman rm telegram_bot || true
           podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest pdm bot
+          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest
         EOF
