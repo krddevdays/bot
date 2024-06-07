@@ -7,9 +7,13 @@ COPY . /app
 RUN pip install --no-cache-dir pdm
 RUN pdm install
 
+COPY --from=builder /app/krddevbot /app/krddevbot
+
 FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=builder /app/__pypackages__ /app/__pypackages__
-COPY --from=builder /app /app
+COPY --from=builder /app/krddevbot/__main__.py /app/
+
+# Указываем точку входа
+CMD ["python", "/app/__main__.py"]
