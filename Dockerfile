@@ -28,10 +28,3 @@
     # Устанавливаем переменные окружения для PDM
     ENV VIRTUAL_ENV=/app/.venv
     ENV PATH="$VIRTUAL_ENV/bin:$PATH"
-    
-    # Объявляем порт, который будет прослушивать бот
-    EXPOSE 8080
-    
-    # Запускаем бота
-    CMD ["pdm", "run", "bot"]
-    
