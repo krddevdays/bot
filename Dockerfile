@@ -18,6 +18,6 @@ COPY --from=builder /app /app
 
 RUN ls -la /app
 
-RUN chmod +x /app/bin
+RUN chmod +x /app
 
-ENTRYPOINT ["/app/bin"]
+ENTRYPOINT ["/app"]
