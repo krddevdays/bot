@@ -18,6 +18,4 @@ COPY --from=builder /app /app
 
 RUN ls -la /app
 
-RUN chmod +x /app
-
-ENTRYPOINT ["/app"]
+ENTRYPOINT ["pdm", "run", "bot"]
