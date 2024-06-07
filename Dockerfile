@@ -37,6 +37,9 @@
     # Объявляем порт, который будет прослушивать бот
     EXPOSE 8080
     
-    # Запускаем бота
-    CMD ["/app/.venv/bin/python", "-m", "pdm", "run", "bot"]
+    # Создаем скрипт для запуска
+    RUN echo '#!/bin/sh\n/app/.venv/bin/python -m pdm run bot' > /app/start.sh && chmod +x /app/start.sh
+    
+    # Используем скрипт для запуска бота
+    CMD ["/app/start.sh"]
     
