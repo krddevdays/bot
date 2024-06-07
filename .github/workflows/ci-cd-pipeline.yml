@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: |
         podman build -t my-test-image . 
-        podman run --rm -v $(pwd):/app my-test-image /app/.venv/bin/pdm run pytest
+        podman run --rm -v $(pwd):/app my-test-image /app/.venv/bin/python -m pdm run pytes
 
     - name: Add SSH key
       uses: webfactory/ssh-agent@v0.5.3
@@ -79,5 +79,5 @@ jobs:
           podman stop telegram_bot || true
           podman rm telegram_bot || true
           podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest /app/.venv/bin/pdm run bot
+          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest /app/.venv/bin/python -m pdm run bot
         EOF
