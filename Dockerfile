@@ -9,9 +9,10 @@
     # Копируем только необходимые файлы для сборки зависимостей
     COPY pyproject.toml pdm.lock /app/
     
-    # Устанавливаем зависимости с помощью PDM и создаем виртуальное окружение
-    RUN pdm install --no-self \
-        && pdm venv create .venv --force
+    # Создаем виртуальное окружение, устанавливаем PDM и зависимости
+    RUN python -m venv /app/.venv \
+        && /app/.venv/bin/pip install --no-cache-dir pdm \
+        && /app/.venv/bin/pdm install --no-self
     
     # ------------------- Stage 2: Final Stage ------------------------------
     FROM python:3.11-slim
@@ -26,7 +27,7 @@
     
     # Устанавливаем переменные окружения для PDM
     ENV VIRTUAL_ENV=/app/.venv
-    ENV PATH="/app/.venv/bin:$PATH"
+    ENV PATH="$VIRTUAL_ENV/bin:$PATH"
     
     # Объявляем порт, который будет прослушивать бот
     EXPOSE 8080
