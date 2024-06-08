@@ -49,6 +49,7 @@ jobs:
     - name: Copy secrets from server
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/${{ secrets.SERVER_USER }}/tasks/cicd/.env" > .env
+        "python3 -m pip install pdm"
 
     - name: Load secrets
       run: |
