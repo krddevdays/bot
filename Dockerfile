@@ -3,10 +3,10 @@ FROM python:3.11-slim as builder
 WORKDIR /app
 
 COPY pyproject.toml pdm.lock /app/
-COPY . /app
 
-RUN pip install --no-cache-dir pdm
-RUN pdm install --prod
+RUN pip install --no-cache-dir pdm && pdm install --prod
+
+COPY . /app
 
 FROM python:3.11-slim
 
