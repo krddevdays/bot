@@ -2,15 +2,16 @@ FROM python:3.11-slim as builder
 
 WORKDIR /app
 
+RUN pip install --no-cache-dir pdm
+
+COPY pyproject.toml pdm.lock README.md /app/
 COPY . /app
 
-RUN pip install --no-cache-dir pdm
-RUN pdm install
+RUN mkdir __pypackages__ && pdm install --prod --no-lock --no-editable
 
 FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY --from=builder /app /app
-COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
-COPY --from=builder /usr/local/bin /usr/local/bin
+ENV PYTHONPATH=/app/pkgs
+COPY --from=builder /app/__pypackages__/3.11/lib /app/pkgs
