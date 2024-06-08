@@ -4,7 +4,7 @@ WORKDIR /app
 
 RUN pip install --no-cache-dir pdm
 
-COPY pyproject.toml pdm.lock README.md /app/
+COPY pyproject.toml pdm.lock /app/
 COPY . /app
 
 RUN mkdir __pypackages__ && pdm install --prod --no-lock --no-editable
