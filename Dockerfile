@@ -3,9 +3,14 @@ FROM python:3.11-slim as builder
 COPY pyproject.toml pdm.lock /app/
 COPY . /app
 
-RUN pip install --no-cache-dir pdm
+RUN pip install --no-cache-dir pdm && \
+    echo "export PATH=$PATH:/root/.local/bin" >> $HOME/.bashrc && \
+    . $HOME/.bashrc
+
+RUN which pdm
+
 WORKDIR /app
-RUN mkdir __pypackages__ && pdm install --prod --no-lock --no-editable
+RUN mkdir __pypackages__ && /root/.local/bin/pdm install --prod --no-lock --no-editable
 
 FROM python:3.11-slim
 
