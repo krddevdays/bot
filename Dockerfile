@@ -5,7 +5,7 @@ COPY . /app
 
 RUN pip install --no-cache-dir pdm
 WORKDIR /app
-RUN RUN mkdir __pypackages__ && pdm install --prod --no-lock --no-editable
+RUN mkdir __pypackages__ && pdm install --prod --no-lock --no-editable
 
 FROM python:3.11-slim
 
