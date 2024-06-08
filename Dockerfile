@@ -5,7 +5,7 @@ WORKDIR /app
 COPY pyproject.toml pdm.lock
 
 RUN pip install --no-cache-dir pdm
-RUN pdm install --prod
+RUN pdm install
 
 COPY . /app
 
