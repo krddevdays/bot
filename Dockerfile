@@ -2,7 +2,7 @@ FROM python:3.11-slim as builder
 
 WORKDIR /app
 
-COPY pyproject.toml /app/
+COPY pyproject.toml /app
 
 RUN pip install --no-cache-dir pdm
 RUN pdm install
