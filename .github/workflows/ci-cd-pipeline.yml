@@ -28,9 +28,8 @@ jobs:
 
     - name: Install dependencies using PDM
       run: |
-        python -m pip install --upgrade pip
-        pip install pdm
-        pdm install
+        pdm lock
+        pdm sync
 
     - name: Run tests
       run: |
@@ -77,6 +76,7 @@ jobs:
         podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
         podman push docker.io/drozdovnikolai/telegram-bot:latest
 
+
   deploy:
     needs: build-and-test
     runs-on: ubuntu-latest
@@ -93,5 +93,5 @@ jobs:
           podman stop telegram_bot || true
           podman rm telegram_bot || true
           podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" -v /app/.venv:/app/.venv docker.io/drozdovnikolai/telegram-bot:latest pdm bot
+          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest pdm bot
         EOF
