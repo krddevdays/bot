@@ -93,5 +93,5 @@ jobs:
           podman stop telegram_bot || true
           podman rm telegram_bot || true
           podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" -v /app/.venv/bin:$PATH docker.io/drozdovnikolai/telegram-bot:latest pdm bot
+          podman run -d --name telegram_bot --network="host" -v /app/.venv:/app/.venv docker.io/drozdovnikolai/telegram-bot:latest pdm bot
         EOF
