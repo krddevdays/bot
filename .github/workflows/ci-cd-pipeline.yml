@@ -49,7 +49,6 @@ jobs:
     - name: Copy secrets from server
       run: |
         ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/${{ secrets.SERVER_USER }}/tasks/cicd/.env" > .env
-        "python3 -m pip install pdm"
 
     - name: Load secrets
       run: |
@@ -94,5 +93,5 @@ jobs:
           podman stop telegram_bot || true
           podman rm telegram_bot || true
           podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest pdm bot
+          podman run -d --name telegram_bot --network="host" -v /app/.venv/bin:$PATH docker.io/drozdovnikolai/telegram-bot:latest pdm bot
         EOF
