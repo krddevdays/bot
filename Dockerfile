@@ -4,7 +4,7 @@ COPY pyproject.toml pdm.lock ./
 RUN pip install --no-cache-dir pdm
 RUN which pdm
 COPY . /app
-RUN mkdir __pypackages__/3.11/lib && /usr/local/bin/pdm install --prod --no-lock --no-editable -g
+RUN mkdir -p __pypackages__/3.11/lib && /usr/local/bin/pdm install --prod --no-lock --no-editable -g
 RUN ls -la /app/__pypackages__/3.11/lib
 
 FROM python:3.11-slim
