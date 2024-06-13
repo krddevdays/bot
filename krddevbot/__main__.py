@@ -16,6 +16,7 @@ from krddevbot import settings
 from krddevbot.antispam import antispam_reactions_checking, greet_chat_members
 from krddevbot.logging import init_logging
 from krddevbot.message_formatter import md
+from krddevbot.request import HTTPXRequestWithRetry
 from krddevbot.tander import days_without_mention
 
 
@@ -29,7 +30,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 if __name__ == "__main__":
     init_logging()
-    application = Application.builder().token(settings.BOT_TOKEN).build()
+    application = Application.builder()\
+        .token(settings.BOT_TOKEN)\
+        .request(HTTPXRequestWithRetry())\
+        .get_updates_request(HTTPXRequestWithRetry())\
+        .build()
 
     application.add_handler(CommandHandler("ping", help_command))
     application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
