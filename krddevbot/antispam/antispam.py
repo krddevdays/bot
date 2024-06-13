@@ -71,7 +71,7 @@ async def check_in_lols_bot(user_id: int) -> bool:
             return should_ban
 
         data = response.json()
-        should_ban = data["banned"] or data["spam_factor"] > 30
+        should_ban = data["banned"]
         logger.info("%s => %s", response.content.decode(), should_ban)
 
     return should_ban
