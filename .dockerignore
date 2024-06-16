@@ -1,2 +1,3 @@
-.github/workflows
-.gitignore
+.git
+.idea
+.env
