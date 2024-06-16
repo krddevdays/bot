@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
     - name: Install PDM
@@ -30,9 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
     - name: Install PDM
@@ -42,7 +42,7 @@ jobs:
     - name: Install dependencies using PDM
       run: |
         pdm install --dev
-    - name: Run tests
+    - name: Run linters
       run: |
         pdm run flake8
 
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
     - name: Login to Docker Hub
@@ -65,11 +65,22 @@ jobs:
         push: true
         tags: krddev/bot:$GITHUB_REF_TYPE
 
-#    - name: Run tests
-#      run: |
-#        echo "Running tests.."
-#        pdm run pytest
-#
+  deploy:
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Add SSH key
+      uses: webfactory/ssh-agent@v0.5.3
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Deploy
+      run: |
+        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+          docker pull docker.io/krddev/bot:$GITHUB_REF_TYPE
+          sudo systemctl restart krddevbot.service
+        EOF
+
 #    - name: Add SSH key
 #      uses: webfactory/ssh-agent@v0.5.3
 #      with:
@@ -82,33 +93,6 @@ jobs:
 #    - name: Copy secrets from server
 #      run: |
 #        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/${{ secrets.SERVER_USER }}/tasks/cicd/.env" > .env
-#
-#    - name: Load secrets
-#      run: |
-#        export $(cat .env | xargs)
-#        echo "DOCKER_USERNAME=$(grep DOCKER_USERNAME .env | cut -d '=' -f2)" >> $GITHUB_ENV
-#        echo "DOCKER_PASSWORD=$(grep DOCKER_PASSWORD .env | cut -d '=' -f2)" >> $GITHUB_ENV
-#
-#    - name: Lint with flake8
-#      run: |
-#        pdm run flake8 .
-#
-#    - name: Build Podman image
-#      run: |
-#        podman build -t docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} .
-#        podman tag docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} docker.io/drozdovnikolai/telegram-bot:latest
-#
-#    - name: Login to DockerHub
-#      env:
-#        DOCKER_USERNAME: ${{ env.DOCKER_USERNAME }}
-#        DOCKER_PASSWORD: ${{ env.DOCKER_PASSWORD }}
-#      run: |
-#        echo "$DOCKER_PASSWORD" | podman login docker.io -u $DOCKER_USERNAME --password-stdin
-#
-#    - name: Push Podman image
-#      run: |
-#        podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
-#        podman push docker.io/drozdovnikolai/telegram-bot:latest
 #
 #
 #  deploy:
