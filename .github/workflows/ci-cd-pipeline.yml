@@ -1,94 +1,131 @@
-name: Python Telegram Bot CI/CD Pipeline
+name: KrdDevBot CI/CD Pipeline
 
 on:
   push:
     branches:
-      - master
+      - cicd
 
 jobs:
-  build-and-test:
+  test:
     runs-on: ubuntu-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.11'
-
+        python-version: '3.10'
     - name: Install PDM
       run: |
         python -m pip install --upgrade pip
         pip install pdm
-
     - name: Install dependencies using PDM
       run: |
-        pdm lock
-        pdm sync
-
+        pdm install --dev
     - name: Run tests
       run: |
-        echo "Running tests.."
         pdm run pytest
 
-    - name: Add SSH key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Add server to known_hosts
-      run: |
-        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
-
-    - name: Copy secrets from server
-      run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/${{ secrets.SERVER_USER }}/tasks/cicd/.env" > .env
-
-    - name: Load secrets
-      run: |
-        export $(cat .env | xargs)
-        echo "DOCKER_USERNAME=$(grep DOCKER_USERNAME .env | cut -d '=' -f2)" >> $GITHUB_ENV
-        echo "DOCKER_PASSWORD=$(grep DOCKER_PASSWORD .env | cut -d '=' -f2)" >> $GITHUB_ENV
-
-    - name: Lint with flake8
-      run: |
-        pdm run flake8 .    
-
-    - name: Build Podman image
-      run: |
-        podman build -t docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} .
-        podman tag docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} docker.io/drozdovnikolai/telegram-bot:latest
-
-    - name: Login to DockerHub
-      env:
-        DOCKER_USERNAME: ${{ env.DOCKER_USERNAME }}
-        DOCKER_PASSWORD: ${{ env.DOCKER_PASSWORD }}
-      run: |
-        echo "$DOCKER_PASSWORD" | podman login docker.io -u $DOCKER_USERNAME --password-stdin
-
-    - name: Push Podman image
-      run: |
-        podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
-        podman push docker.io/drozdovnikolai/telegram-bot:latest
-
-
-  deploy:
-    needs: build-and-test
+  lint:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
     steps:
-    - name: Add SSH key
-      uses: webfactory/ssh-agent@v0.5.3
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
       with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-    - name: Deploy
+        python-version: '3.10'
+    - name: Install PDM
       run: |
-        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-          podman stop telegram_bot || true
-          podman rm telegram_bot || true
-          podman pull docker.io/drozdovnikolai/telegram-bot:latest
-          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest pdm bot
-        EOF
+        python -m pip install --upgrade pip
+        pip install pdm
+    - name: Install dependencies using PDM
+      run: |
+        pdm install --dev
+    - name: Run tests
+      run: |
+        pdm run flake8
+
+  build:
+    needs: [test, lint]
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Build and push
+      uses: docker/build-push-action@v5
+      with:
+        push: true
+        tags: krddev/bot:$GITHUB_REF_TYPE
+
+#    - name: Run tests
+#      run: |
+#        echo "Running tests.."
+#        pdm run pytest
+#
+#    - name: Add SSH key
+#      uses: webfactory/ssh-agent@v0.5.3
+#      with:
+#        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+#
+#    - name: Add server to known_hosts
+#      run: |
+#        ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+#
+#    - name: Copy secrets from server
+#      run: |
+#        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} "cat /home/${{ secrets.SERVER_USER }}/tasks/cicd/.env" > .env
+#
+#    - name: Load secrets
+#      run: |
+#        export $(cat .env | xargs)
+#        echo "DOCKER_USERNAME=$(grep DOCKER_USERNAME .env | cut -d '=' -f2)" >> $GITHUB_ENV
+#        echo "DOCKER_PASSWORD=$(grep DOCKER_PASSWORD .env | cut -d '=' -f2)" >> $GITHUB_ENV
+#
+#    - name: Lint with flake8
+#      run: |
+#        pdm run flake8 .
+#
+#    - name: Build Podman image
+#      run: |
+#        podman build -t docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} .
+#        podman tag docker.io/drozdovnikolai/telegram-bot:${{ github.sha }} docker.io/drozdovnikolai/telegram-bot:latest
+#
+#    - name: Login to DockerHub
+#      env:
+#        DOCKER_USERNAME: ${{ env.DOCKER_USERNAME }}
+#        DOCKER_PASSWORD: ${{ env.DOCKER_PASSWORD }}
+#      run: |
+#        echo "$DOCKER_PASSWORD" | podman login docker.io -u $DOCKER_USERNAME --password-stdin
+#
+#    - name: Push Podman image
+#      run: |
+#        podman push docker.io/drozdovnikolai/telegram-bot:${{ github.sha }}
+#        podman push docker.io/drozdovnikolai/telegram-bot:latest
+#
+#
+#  deploy:
+#    needs: build-and-test
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/master'
+#    steps:
+#    - name: Add SSH key
+#      uses: webfactory/ssh-agent@v0.5.3
+#      with:
+#        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+#
+#    - name: Deploy
+#      run: |
+#        ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+#          podman stop telegram_bot || true
+#          podman rm telegram_bot || true
+#          podman pull docker.io/drozdovnikolai/telegram-bot:latest
+#          podman run -d --name telegram_bot --network="host" docker.io/drozdovnikolai/telegram-bot:latest pdm bot
+#        EOF

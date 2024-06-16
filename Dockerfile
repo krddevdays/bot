@@ -14,6 +14,8 @@ COPY pyproject.toml pdm.lock /app/
 RUN pdm install --check --prod --no-editable \
     && find /usr/local/lib -name "*.pyc" -exec rm -f {} \;
 
+RUN pdm export --dev --without-hashes > /app/.venv/requirements.txt
+
 FROM python:$PYTHON_BASE
 
 WORKDIR /app
