@@ -1,7 +1,8 @@
 import logging
 import pathlib
 import re
-from datetime import datetime, UTC
+from pytz import UTC
+from datetime import datetime
 
 from telegram import Update
 from telegram.ext import ContextTypes
