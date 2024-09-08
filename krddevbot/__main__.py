@@ -18,6 +18,7 @@ from krddevbot.logging import init_logging
 from krddevbot.message_formatter import md
 from krddevbot.request import HTTPXRequestWithRetry
 from krddevbot.tander import days_without_mention
+from krddevbot.avito import nice_ban
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -40,5 +41,6 @@ if __name__ == "__main__":
     application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
     application.add_handler(MessageReactionHandler(antispam_reactions_checking))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, days_without_mention))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, nice_ban))
 
     application.run_polling(allowed_updates=Update.ALL_TYPES)
