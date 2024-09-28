@@ -69,7 +69,7 @@ async def nice_ban(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user = update.message.from_user
         logger.debug("В группе %s (%s) опять срётся про Авито", chat.username, chat.id)
 
-        #await sleep(randint(1, 60))
+        await sleep(randint(1, 60))
         
         if your_lucky(0.005):
             await mute_user(
