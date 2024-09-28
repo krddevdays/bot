@@ -8,3 +8,4 @@ __pypackages__/
 tmp/
 
 .env
+krddevbot/settings.py
