@@ -39,14 +39,11 @@ async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: i
     )
 
 async def track_user_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await check_user_joined(update=update, context=context)
-    await days_without_mention(update=update, context=context)
-    await nice_ban(update=update, context=context)
-    
-    
-async def check_user_joined(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message and context.user_data.get('joined', False):
         await update.message.delete()
+    else:
+        await days_without_mention(update=update, context=context)
+        await nice_ban(update=update, context=context)
 
 async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message and pattern_tander.search(update.message.text):
