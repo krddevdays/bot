@@ -1,4 +1,0 @@
-httpx==0.27.2
-pytest==8.1.1
-python-telegram-bot==21.6
-sentry_sdk==1.42.0
