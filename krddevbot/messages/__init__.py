@@ -12,8 +12,10 @@ logger = logging.getLogger(__name__)
 pattern_tander = re.compile("тандер", re.IGNORECASE | re.MULTILINE | re.UNICODE)
 pattern_avito = re.compile("авито|avito|@vito|@вито|девито|devito", re.IGNORECASE | re.MULTILINE | re.UNICODE)
 
+
 def your_lucky(probability: float) -> bool:
     return random() < probability
+
 
 async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int, duration: int) -> None:
     now_utc = datetime.now(UTC)
@@ -38,12 +40,14 @@ async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: i
         until_date=unix_time+duration
     )
 
+
 async def track_user_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message and context.user_data.get('joined', False):
         await update.message.delete()
     else:
         await days_without_mention(update=update, context=context)
         await nice_ban(update=update, context=context)
+
 
 async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message and pattern_tander.search(update.message.text):
@@ -59,6 +63,7 @@ async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYP
         else:
             logger.debug("Включён Тандер для группы %s (%s)", chat.username, chat.id)
             file_path.touch()
+
 
 async def nice_ban(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if update.message and pattern_avito.search(update.message.text):
