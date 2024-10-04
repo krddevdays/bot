@@ -27,7 +27,7 @@ async def command_handler(update: Update, context: ContextTypes.DEFAULT_TYPE, *,
     context.job_queue.run_once(delete_messages, when=30, data={
         'chat_id': command_message.chat_id,
         'command_message_id': command_message.message_id,
-        'help_message_id': message.message_id
+        'help_message_id': message.message_id,
     })
 
 

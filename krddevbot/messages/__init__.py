@@ -30,14 +30,14 @@ async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: i
         can_send_photos=False,
         can_send_videos=False,
         can_send_video_notes=False,
-        can_send_voice_notes=False
+        can_send_voice_notes=False,
     )
 
     await context.bot.restrict_chat_member(
         chat_id=chat_id,
         user_id=user_id,
         permissions=permissions,
-        until_date=unix_time+duration
+        until_date=unix_time+duration,
     )
 
 
@@ -78,7 +78,7 @@ async def nice_ban(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 context=context,
                 user_id=user.id,
                 chat_id=chat.id,
-                duration=24*60*60
+                duration=24*60*60,
             )
             await update.message.reply_text("WOW! Стоит прикупить лотерейный билет, с такой удачей. До встречи через сутки.")
         elif your_lucky(0.05):
@@ -86,7 +86,7 @@ async def nice_ban(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 context=context,
                 user_id=user.id,
                 chat_id=chat.id,
-                duration=60*60
+                duration=60*60,
             )
             await update.message.reply_text("Ты счастливчик! Помянем часом молчания.")
         else:
