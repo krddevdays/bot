@@ -19,7 +19,7 @@ def your_lucky(probability: float) -> bool:
     return random() < probability
 
 
-def is_checking_member(prefix):
+def is_checking_member(prefix: str) -> str | None:
     for item in CHECKING_MEMBERS:
         if item.startswith(prefix):
             return item
