@@ -121,8 +121,6 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
 
     user = update.chat_member.new_chat_member.user
     
-    context.user_data['joined'] = True
-
     if settings.LOLS_BOT_ENABLED:
         if await check_in_lols_bot(user.id):
             await update.chat_member.chat.ban_member(user.id, revoke_messages=True)

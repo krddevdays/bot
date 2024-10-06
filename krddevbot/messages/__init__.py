@@ -8,6 +8,8 @@ from datetime import datetime, UTC
 from telegram import Update, ChatPermissions
 from telegram.ext import ContextTypes
 
+from ..antispam.storage import CHECKING_MEMBERS
+
 logger = logging.getLogger(__name__)
 pattern_tander = re.compile("тандер", re.IGNORECASE | re.MULTILINE | re.UNICODE)
 pattern_avito = re.compile("авито|avito|@vito|@вито|девито|devito", re.IGNORECASE | re.MULTILINE | re.UNICODE)
@@ -15,6 +17,13 @@ pattern_avito = re.compile("авито|avito|@vito|@вито|девито|devito
 
 def your_lucky(probability: float) -> bool:
     return random() < probability
+
+
+def is_checking_member(prefix):
+    for item in CHECKING_MEMBERS:
+        if item.startswith(prefix):
+            return item
+    return None
 
 
 async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int, duration: int) -> None:
@@ -42,7 +51,9 @@ async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: i
 
 
 async def track_user_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.message and context.user_data.get('joined', False):
+    member = f"{update.message.from_user.id}_{update.effective_chat.id}"
+
+    if update.message and is_checking_member(member):
         await update.message.delete()
     else:
         await days_without_mention(update=update, context=context)
