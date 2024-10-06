@@ -72,22 +72,31 @@ async def nice_ban(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.debug("В группе %s (%s) опять срётся про Авито", chat.username, chat.id)
 
         await sleep(randint(1, 60))
+
+        results = []
+        
+        for _ in range(4):
+            results.append(str(randint(1, 20)))
+        
+        result4d20 = ", ".join(results)
+
+        lucky_user = f"@{user.username}" if user.username else f"#{user.id}"
         
         if your_lucky(0.005):
             await mute_user(
                 context=context,
                 user_id=user.id,
                 chat_id=chat.id,
-                duration=24*60*60,
+                duration=30*60,
             )
-            await update.message.reply_text("WOW! Стоит прикупить лотерейный билет, с такой удачей. До встречи через сутки.")
+            await update.message.reply_text(f"Пользователь {lucky_user} призвал Авито. Спас-бросок 4d20: {result4d20}. Промах! Бан на пол часа.")
         elif your_lucky(0.05):
             await mute_user(
                 context=context,
                 user_id=user.id,
                 chat_id=chat.id,
-                duration=60*60,
+                duration=5*60,
             )
-            await update.message.reply_text("Ты счастливчик! Помянем часом молчания.")
+            await update.message.reply_text(f"Пользователь {lucky_user} призвал Авито. Спас-бросок 4d20: {result4d20}. Промах! Бан на пять минут.")
         else:
             await update.message.reply_text("Может, хватит уже про Авито?")
