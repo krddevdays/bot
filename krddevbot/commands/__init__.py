@@ -16,7 +16,7 @@ async def delete_messages(context: ContextTypes.DEFAULT_TYPE) -> None:
     chat_id = context.job.data['chat_id']
     
     await context.bot.delete_message(chat_id=chat_id, message_id=context.job.data['command_message_id'])
-    await context.bot.delete_message(chat_id=chat_id, message_id=context.job.data['help_message_id'])
+    await context.bot.delete_message(chat_id=chat_id, message_id=context.job.data['answer_message_id'])
 
 
 async def command_handler(update: Update, context: ContextTypes.DEFAULT_TYPE, *, message_template: str, parse_mode: str = "") -> None:
@@ -27,7 +27,7 @@ async def command_handler(update: Update, context: ContextTypes.DEFAULT_TYPE, *,
     context.job_queue.run_once(delete_messages, when=30, data={
         'chat_id': command_message.chat_id,
         'command_message_id': command_message.message_id,
-        'help_message_id': message.message_id,
+        'answer_message_id': message.message_id,
     })
 
 
