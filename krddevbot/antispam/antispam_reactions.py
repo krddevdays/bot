@@ -18,10 +18,10 @@ async def antispam_reactions_checking(update: Update, context: ContextTypes.DEFA
     new_reactions = update.message_reaction.new_reaction
 
     if challenge := CHECKING_MEMBERS.get(f"{user.id}_{chat_id}_{message_id}"):
-        # Verify emoji on greeting message
         for reaction in new_reactions:
             if reaction.emoji in challenge:
-                # Remove greeting message and welcome user
+                context.user_data['joined'] = False
+                
                 await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
                 del CHECKING_MEMBERS[f"{user.id}_{chat_id}_{message_id}"]
 

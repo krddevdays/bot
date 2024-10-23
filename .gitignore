@@ -3,7 +3,7 @@
 .history/
 .pdm-python
 krddevbot.egg-info/
-krddevbot/__pycache__/
+**__pycache__/
 __pypackages__/
 tmp/
 
