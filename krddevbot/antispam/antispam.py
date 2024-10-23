@@ -3,6 +3,7 @@ import random
 from typing import Optional, Tuple
 
 import httpx
+from telegram import User, Chat
 from telegram import ChatMember, ChatMemberUpdated, Update
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -21,9 +22,7 @@ from ..message_sender import send_garbage_message
 logger = logging.getLogger(__name__)
 
 
-def extract_status_change(
-    chat_member_update: ChatMemberUpdated,
-) -> Optional[Tuple[bool, bool]]:
+def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
     of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
     the status didn't change.
@@ -77,7 +76,7 @@ async def check_in_lols_bot(user_id: int) -> bool:
     return should_ban
 
 
-async def emoji_challenge(context, user, chat):
+async def emoji_challenge(context: ContextTypes.DEFAULT_TYPE, user: User, chat: Chat) -> None:
     challenge_text = random.choice(list(EMOJI.keys()))
 
     sent_msg = await send_garbage_message(
@@ -121,7 +120,7 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     user = update.chat_member.new_chat_member.user
-
+    
     if settings.LOLS_BOT_ENABLED:
         if await check_in_lols_bot(user.id):
             await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
@@ -130,7 +129,7 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await emoji_challenge(context, user, update.effective_chat)
 
 
-async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
+async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE) -> None:
     message_id = context.job.data["message_id"]
     user = context.job.data["user"]
 
@@ -156,3 +155,4 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE):
         revoke_messages=True,
     )
     await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id)
+    

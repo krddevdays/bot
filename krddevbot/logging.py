@@ -5,7 +5,7 @@ import sentry_sdk
 from krddevbot import settings
 
 
-def init_logging():
+def init_logging() -> None:
     logging.basicConfig(format="%(asctime)s [%(levelname)s] %(name)s: %(message)s", level=settings.LOG_LEVEL)
 
     # set higher logging level for httpx to avoid all GET and POST requests being logged

@@ -11,7 +11,7 @@ from krddevbot import settings
 logger = logging.getLogger(__name__)
 
 
-def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_seconds: int):
+def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_seconds: int) -> None:
     """Creates new job for run garbage collector task with specified message after timeout"""
     context.job_queue.run_once(
         callback=partial(_gc_task, chat_id=message.chat_id, message_id=message.message_id),
@@ -20,7 +20,7 @@ def job(context: ContextTypes.DEFAULT_TYPE, message: Message, message_timeout_se
     )
 
 
-async def _gc_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int):
+async def _gc_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id: int) -> None:
     """Remove garbage message from chat"""
     try:
         await context.bot.delete_message(chat_id=chat_id, message_id=message_id)
