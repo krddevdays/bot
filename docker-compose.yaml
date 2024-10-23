@@ -1,0 +1,11 @@
+version: '3'
+
+services:
+  krddevbot:
+    image: krddev/bot:main
+    container_name: krddevbot
+    restart: always
+    volumes:
+     - ~/krddevbot/tander:/app/tander
+    env_file:
+      - ~/krddevbot/.env
