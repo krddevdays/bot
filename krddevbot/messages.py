@@ -1,10 +1,12 @@
 import logging
 
 from functools import partial
+from typing import Optional
 
-from telegram import Message
+from telegram import Message, User
 from telegram.ext import ContextTypes
 from telegram.error import TelegramError
+from telegram.helpers import escape_markdown
 
 from krddevbot import settings
 
@@ -29,3 +31,24 @@ async def _gc_task(context: ContextTypes.DEFAULT_TYPE, chat_id: int, message_id:
             logger.info(f"{exc.message} chat_id={chat_id} message_id={message_id}")
         else:
             raise exc
+
+
+async def send_garbage_message(context: ContextTypes.DEFAULT_TYPE, message_timeout_seconds=settings.GARBAGE_MESSAGE_TIMEOUT_SECONDS, **kwargs) -> Message:
+    message = await context.bot.send_message(**kwargs)
+    job(context, message, message_timeout_seconds)
+    return message
+
+
+MAGIC_USER_STRING = "SOMEMAGICSTRING"
+
+
+def md(template: str, user: Optional[dict | User] = None, **kwargs) -> str:
+    if user:
+        kwargs["username"] = MAGIC_USER_STRING
+
+    result = escape_markdown(template.format(**kwargs), version=2)
+    if user:
+        if not isinstance(user, User):
+            user = User(**user)
+        result = result.replace(MAGIC_USER_STRING, user.mention_markdown_v2(user.username))
+    return result

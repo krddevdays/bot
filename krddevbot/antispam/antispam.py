@@ -16,13 +16,12 @@ from .constance import (
     TIMEOUT_FAIL_MESSAGE_TEMPLATE,
 )
 from .storage import CHECKING_MEMBERS
-from ..message_formatter import md
-from ..message_sender import send_garbage_message
+from ..messages import send_garbage_message, md
 
 logger = logging.getLogger(__name__)
 
 
-def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
+def _extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tuple[bool, bool]]:
     """Takes a ChatMemberUpdated instance and extracts whether the 'old_chat_member' was a member
     of the chat and whether the 'new_chat_member' is a member of the chat. Returns None, if
     the status didn't change.
@@ -48,7 +47,7 @@ def extract_status_change(chat_member_update: ChatMemberUpdated) -> Optional[Tup
     return was_member, is_member
 
 
-async def check_in_lols_bot(user_id: int) -> bool:
+async def _check_in_lols_bot(user_id: int) -> bool:
     """
     Sends a request to lols bot.
     If the response from lols bot has not arrived or the response code is not equal to 200 or user_id is not int,
@@ -61,7 +60,7 @@ async def check_in_lols_bot(user_id: int) -> bool:
     client = httpx.AsyncClient(timeout=10)
 
     try:
-        response = await client.get(f"https://lols.bot/", params={"a": user_id})
+        response = await client.get(f"https://api.lols.bot/", params={"a": user_id})
     except httpx.TransportError as e:
         logger.error("httpx.{err_class}: cannot connect to lols bot".format(err_class=e.__class__.__name__))
     else:
@@ -76,7 +75,7 @@ async def check_in_lols_bot(user_id: int) -> bool:
     return should_ban
 
 
-async def emoji_challenge(context: ContextTypes.DEFAULT_TYPE, user: User, chat: Chat) -> None:
+async def _emoji_challenge(context: ContextTypes.DEFAULT_TYPE, user: User, chat: Chat) -> None:
     challenge_text = random.choice(list(EMOJI.keys()))
 
     sent_msg = await send_garbage_message(
@@ -109,7 +108,7 @@ async def emoji_challenge(context: ContextTypes.DEFAULT_TYPE, user: User, chat: 
 
 async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Greets new users in chats and announces when someone leaves"""
-    result = extract_status_change(update.chat_member)
+    result = _extract_status_change(update.chat_member)
     if result is None:
         return
 
@@ -120,13 +119,13 @@ async def greet_chat_members(update: Update, context: ContextTypes.DEFAULT_TYPE)
         return
 
     user = update.chat_member.new_chat_member.user
-    
+
     if settings.LOLS_BOT_ENABLED:
-        if await check_in_lols_bot(user.id):
+        if await _check_in_lols_bot(user.id):
             await update.chat_member.chat.ban_member(user.id, revoke_messages=True)
             return
 
-    await emoji_challenge(context, user, update.effective_chat)
+    await _emoji_challenge(context, user, update.effective_chat)
 
 
 async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -155,4 +154,10 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE) -> None:
         revoke_messages=True,
     )
     await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id)
-    
+
+
+async def track_user_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    prefix = f"{update.message.from_user.id}_{update.effective_chat.id}"
+
+    if update.message and any([x.startswith(prefix) for x in CHECKING_MEMBERS]):
+        await update.message.delete()
