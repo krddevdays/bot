@@ -1,6 +1,7 @@
 import importlib
 
 from telegram import Update
+from telegram.ext import Application
 
 from krddevbot import settings
 from krddevbot.application import KrdDevBotApplication
@@ -10,7 +11,8 @@ from krddevbot.request import HTTPXRequestWithRetry
 
 if __name__ == "__main__":
     init_logging()
-    application = KrdDevBotApplication.builder()\
+    application = Application.builder()\
+        .application_class(KrdDevBotApplication)\
         .token(settings.BOT_TOKEN)\
         .request(HTTPXRequestWithRetry())\
         .get_updates_request(HTTPXRequestWithRetry())\

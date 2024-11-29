@@ -60,7 +60,7 @@ async def _check_in_lols_bot(user_id: int) -> bool:
     client = httpx.AsyncClient(timeout=10)
 
     try:
-        response = await client.get(f"https://api.lols.bot/", params={"a": user_id})
+        response = await client.get(f"https://api.lols.bot/account", params={"id": user_id})
     except httpx.TransportError as e:
         logger.error("httpx.{err_class}: cannot connect to lols bot".format(err_class=e.__class__.__name__))
     else:
@@ -68,9 +68,9 @@ async def _check_in_lols_bot(user_id: int) -> bool:
             logger.error("lols bot return {status} code".format(status=response.status_code))
             return should_ban
 
+        logger.info('lols response: %s', response.content.decode())
         data = response.json()
         should_ban = data["banned"]
-        logger.info("%s => %s", response.content.decode(), should_ban)
 
     return should_ban
 
