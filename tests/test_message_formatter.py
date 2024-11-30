@@ -1,6 +1,6 @@
 import pytest
 
-from krddevbot.message_formatter import md
+from krddevbot.messages import md
 
 TEMPLATE = "Hello, {username} !"
 

@@ -35,7 +35,7 @@ class HttpxAsyncClient(AsyncClient):
             http2=http2,
             limits=limits,
             trust_env=trust_env,
-            retries=RETRY_TIMES_DEFAULTS
+            retries=RETRY_TIMES_DEFAULTS,
         )
 
 
