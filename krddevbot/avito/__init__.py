@@ -6,10 +6,12 @@ from pytz import UTC
 from datetime import datetime
 
 from telegram import Update, ChatPermissions
+from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
 
 from krddevbot import settings
 from krddevbot.application import KrdDevBotApplication
+from krddevbot.messages import send_garbage_message, md
 
 logger = logging.getLogger(__name__)
 pattern_avito = re.compile("авито|avito|@vito|@вито|aвито", re.IGNORECASE | re.MULTILINE | re.UNICODE)
@@ -71,7 +73,7 @@ async def nice_ban(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             )
         else:
             message += " Успех!"
-        await update.message.reply_text(message)
+        await send_garbage_message(context, chat_id=update.message.chat_id, text=md(message), parse_mode=ParseMode.MARKDOWN_V2, message_timeout_seconds=10)
 
 
 def init(application: KrdDevBotApplication):

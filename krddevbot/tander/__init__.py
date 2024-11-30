@@ -1,7 +1,7 @@
 import logging
 import pathlib
 import re
-from datetime import datetime, UTC
+from datetime import datetime, timezone
 
 from telegram import Update
 from telegram.ext import ContextTypes
@@ -18,7 +18,7 @@ async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYP
         logger.debug("В группе %s (%s) вспомнили Тандер", chat.username, chat.id)
         file_path = pathlib.Path(f"tander/{abs(chat.id)}")
         if file_path.is_file():
-            diff = datetime.now(UTC) - datetime.fromtimestamp(file_path.stat().st_mtime, UTC)
+            diff = datetime.now(timezone.utc) - datetime.fromtimestamp(file_path.stat().st_mtime, timezone.utc)
             logger.debug("В последний раз это было %s назад", diff)
             if diff.days > 0:
                 file_path.touch()
