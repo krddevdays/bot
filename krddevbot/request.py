@@ -40,5 +40,10 @@ class HttpxAsyncClient(AsyncClient):
 
 
 class HTTPXRequestWithRetry(HTTPXRequest):
+    TIMEOUT = 60.0
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(read_timeout=self.TIMEOUT, write_timeout=self.TIMEOUT, connect_timeout=self.TIMEOUT, *args, **kwargs)
+
     def _build_client(self) -> httpx.AsyncClient:
         return HttpxAsyncClient(**self._client_kwargs)  # type: ignore[arg-type]
