@@ -1,5 +1,6 @@
 import logging
 import random
+from asyncio import sleep
 from typing import Optional, Tuple
 
 import httpx
@@ -137,8 +138,6 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE) -> None:
     if key not in CHECKING_MEMBERS:
         return
 
-    del CHECKING_MEMBERS[key]
-
     # User reaction on message is timed out
     await send_garbage_message(
         context,
@@ -149,6 +148,11 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # kick, not ban
     await context.bot.unban_chat_member(chat_id=context.job.chat_id, user_id=context.job.user_id, only_if_banned=False)
+
+    # some bots send message immediately after kick
+    # I suppose it's some kind of race condition when kick was not propagated to all servers
+    await sleep(10)
+    del CHECKING_MEMBERS[key]
 
 
 async def track_user_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
