@@ -1,10 +1,11 @@
+import ssl
 import typing
 
 import httpx
 
 from httpx import AsyncClient, Limits, AsyncBaseTransport, ASGITransport, AsyncHTTPTransport
 from httpx._config import DEFAULT_LIMITS
-from httpx._types import VerifyTypes, CertTypes
+from httpx._types import CertTypes
 from telegram.request._httpxrequest import HTTPXRequest
 
 RETRY_TIMES_DEFAULTS = 5
@@ -13,7 +14,7 @@ RETRY_TIMES_DEFAULTS = 5
 class HttpxAsyncClient(AsyncClient):
     def _init_transport(
         self,
-        verify: VerifyTypes = True,
+        verify: ssl.SSLContext | str | bool = True,
         cert: typing.Optional[CertTypes] = None,
         http1: bool = True,
         http2: bool = False,
