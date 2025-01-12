@@ -12,7 +12,7 @@ from krddevbot.messages import md
 
 
 def get_redis_client():
-    url = f'redis://{settings.REDIS_HOST}'
+    url = f'redis://default:{settings.REDIS_PASSWORD}@{settings.REDIS_HOST}'
     return aioredis.from_url(url)
 
 

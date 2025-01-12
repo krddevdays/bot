@@ -10,5 +10,6 @@ GARBAGE_MESSAGE_TIMEOUT_SECONDS = int(os.environ.get("GARBAGE_MESSAGE_TIMEOUT_SE
 AVITO_DICES = os.environ.get("AVITO_DICES", "4d20")
 AVITO_THRESHOLD = int(os.environ.get("AVITO_THRESHOLD", "8"))
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
+REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
 BANOFBOT_LIMIT = int(os.environ.get("BANOFBOT_LIMIT", "10"))
 BANOFBOT_DRY_RUN = bool(os.environ.get("BANOFBOT_DRY_RUN", "True"))
