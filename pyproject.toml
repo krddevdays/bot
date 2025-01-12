@@ -11,6 +11,8 @@ requires-python = ">=3.10"
 dependencies = [
     "python-telegram-bot[job-queue]>=21.9",
     "sentry-sdk>=1.39.2",
+    "redis>=5.2.1",
+    "pytz"
 ]
 
 [project.urls]
