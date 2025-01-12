@@ -54,9 +54,9 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     action, message_id, user_id = query.data.split('_')
 
     redis_client = get_redis_client()
-    await redis_client.sadd(query.data, update.effective_user.full_name)
+    await redis_client.sadd(query.data, md('{username}', user=update.effective_user))
     members = await redis_client.smembers(query.data)
-    if len(members) > settings.BANOFBOT_LIMIT:
+    if len(members) >= settings.BANOFBOT_LIMIT:
         mems = ', '.join(m.decode() for m in members)
         username = await redis_client.get(f'user_{user_id}')
         if action == "ban":
