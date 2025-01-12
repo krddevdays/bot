@@ -156,7 +156,7 @@ async def kick_if_time_is_over(context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def track_user_messages(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    prefix = f"{update.message.from_user.id}_{update.effective_chat.id}"
+    prefix = f"{update.effective_message.from_user.id}_{update.effective_chat.id}"
 
     if update.message and any([x.startswith(prefix) for x in CHECKING_MEMBERS]):
         await update.message.delete()
