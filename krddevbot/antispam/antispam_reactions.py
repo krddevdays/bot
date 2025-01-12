@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
 
 from .constance import CHALLENGE_OK_MESSAGE_TEMPLATE, CHALLENGE_FAIL_MESSAGE
-from .storage import CHECKING_MEMBERS
+from krddevbot.storage import CHECKING_MEMBERS
 from ..messages import md, send_garbage_message
 
 

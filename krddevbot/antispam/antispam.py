@@ -16,7 +16,7 @@ from .constance import (
     GREETING_MESSAGE_TEMPLATE,
     TIMEOUT_FAIL_MESSAGE_TEMPLATE,
 )
-from .storage import CHECKING_MEMBERS
+from krddevbot.storage import CHECKING_MEMBERS
 from ..messages import send_garbage_message, md
 
 logger = logging.getLogger(__name__)

@@ -1,9 +1,7 @@
-from telegram import Update
-from telegram.ext import ChatMemberHandler, MessageReactionHandler, ContextTypes
+from telegram.ext import ChatMemberHandler, MessageReactionHandler
 
 from .antispam import greet_chat_members, track_user_messages
 from .antispam_reactions import antispam_reactions_checking
-from .storage import CHECKING_MEMBERS
 from krddevbot.application import KrdDevBotApplication
 
 
