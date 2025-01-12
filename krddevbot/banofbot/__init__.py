@@ -1,5 +1,3 @@
-from asyncio import sleep
-
 from redis import asyncio as aioredis
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, User
 from telegram.error import BadRequest
@@ -85,7 +83,6 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 await context.bot.ban_chat_member(update.effective_message.chat_id, user_id)
         elif action == "forgive":
             await query.message.reply_text(f"Пользователь {ban_name.decode()} был прощён\nСпасители: {mems}")
-        await sleep(60)
         await context.bot.delete_message(update.effective_message.chat_id, update.effective_message.message_id)
         await context.bot.delete_message(update.effective_message.chat_id, message_id)
     else:
