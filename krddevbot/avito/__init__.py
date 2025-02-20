@@ -14,7 +14,7 @@ from krddevbot.application import KrdDevBotApplication
 from krddevbot.messages import send_garbage_message, md
 
 logger = logging.getLogger(__name__)
-pattern_avito = re.compile("авито|avito|@vito|@вито|aвито", re.IGNORECASE | re.MULTILINE | re.UNICODE)
+pattern_avito = re.compile(r'(\A|\W)("|avito|@vito|@вито|авито|")(\Z|\b)', re.IGNORECASE | re.MULTILINE | re.UNICODE)
 
 ban_permissions = ChatPermissions(
     can_send_messages=False,
