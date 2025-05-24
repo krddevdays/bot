@@ -9,7 +9,7 @@ from telegram.ext import ContextTypes
 from krddevbot.application import KrdDevBotApplication
 
 logger = logging.getLogger(__name__)
-pattern_tander = re.compile("тандер", re.IGNORECASE | re.MULTILINE | re.UNICODE)
+pattern_tander = re.compile(r'(\A|\b)тандер(\Z|\b)', re.IGNORECASE | re.MULTILINE | re.UNICODE)
 
 
 async def days_without_mention(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
