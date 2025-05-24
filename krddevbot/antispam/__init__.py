@@ -7,5 +7,10 @@ from krddevbot.application import KrdDevBotApplication
 
 def init(application: KrdDevBotApplication):
     application.add_handler(ChatMemberHandler(greet_chat_members, ChatMemberHandler.CHAT_MEMBER))
-    application.add_handler(MessageReactionHandler(antispam_reactions_checking))
+    application.add_handler(
+        MessageReactionHandler(
+            antispam_reactions_checking,
+            message_reaction_types=MessageReactionHandler.MESSAGE_REACTION_UPDATED
+        )
+    )
     application.messages.append(track_user_messages)

@@ -63,10 +63,10 @@ async def _check_in_lols_bot(user_id: int) -> bool:
     try:
         response = await client.get(f"https://api.lols.bot/account", params={"id": user_id})
     except httpx.TransportError as e:
-        logger.error("httpx.{err_class}: cannot connect to lols bot".format(err_class=e.__class__.__name__))
+        logger.warning("httpx.{err_class}: cannot connect to lols bot".format(err_class=e.__class__.__name__))
     else:
         if response.status_code != 200:
-            logger.error("lols bot return {status} code".format(status=response.status_code))
+            logger.warning("lols bot return {status} code".format(status=response.status_code))
             return should_ban
 
         logger.info('lols response: %s', response.content.decode())
