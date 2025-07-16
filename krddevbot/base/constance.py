@@ -12,6 +12,7 @@ LIST_MESSAGE_TEMPLATE = """Чаты по интересам:
 @rubykrd - для Ruby разработчиков;
 @androidkrd - для Android разработчиков;
 @KrdDotNetCommunity - для тех, кто пишет на DotNet;
+@gamedev_krd_chat - для gamedev разработчиков;
 @phpkrd - для PHP разработчиков;
 @krdmobile - для мобильных разработчиков;
 @removedev - для тех, кто работает удаленно;
