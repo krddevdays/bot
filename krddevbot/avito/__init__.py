@@ -2,8 +2,7 @@ import logging
 import re
 from random import randint
 
-from pytz import UTC
-from datetime import datetime
+from datetime import datetime, timezone
 
 from telegram import Update, ChatPermissions
 from telegram.constants import ParseMode
@@ -35,7 +34,7 @@ def get_dices() -> list[int]:
 
 
 async def mute_user(context: ContextTypes.DEFAULT_TYPE, user_id: int, chat_id: int, duration: int) -> None:
-    now_utc = datetime.now(UTC)
+    now_utc = datetime.now(timezone.utc)
     unix_time = int(now_utc.timestamp())
 
     await context.bot.restrict_chat_member(

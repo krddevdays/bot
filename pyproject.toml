@@ -6,31 +6,33 @@ authors = [
     {name = "TyVik", email = "tyvik@krd.dev"}
 ]
 license = {text = "MIT"}
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 
 dependencies = [
-    "python-telegram-bot[job-queue]>=21.9",
-    "sentry-sdk>=1.39.2",
-    "redis>=5.2.1",
-    "pytz"
+    "python-telegram-bot[job-queue]>=21.9,<22",
+    "sentry-sdk>=1.39.2,<2",
+    "redis>=5.2.1,<6",
 ]
 
 [project.urls]
 Homepage = "https://t.me/krddevdays_chat"
 Repository = "https://github.com/krddevdays/bot"
 
-[project.scripts]
-pdm = "pdm.core:main"
-
-[tool.pdm.scripts]
-_.env_file = ".env"
-bot = "python -m krddevbot"
-tests = "pytest tests"
-
-# dev run: nodemon -e py --exec pdm run bot
-
-[tool.pdm.dev-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8.0.0",
-    "flake8>=5.0.0", 
+    "ruff>=0.8.0",
 ]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 120
+exclude = [".venv", ".git", "__pycache__"]
+
+[tool.ruff.lint]
+ignore = ["E501", "E203", "E305", "F401", "F541"]

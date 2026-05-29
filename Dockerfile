@@ -1,26 +1,24 @@
-ARG PYTHON_BASE=3.10-slim
+ARG PYTHON_BASE=3.13-slim
 
 FROM python:$PYTHON_BASE AS builder
 
-ENV PDM_CHECK_UPDATE=false
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=never
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir -U pdm \
-    && find /usr/local/lib -name "*.pyc" -exec rm -f {} \;
+COPY pyproject.toml uv.lock /app/
 
-COPY pyproject.toml pdm.lock /app/
-
-RUN pdm install --check --prod --no-editable \
-    && find /usr/local/lib -name "*.pyc" -exec rm -f {} \;
-
-RUN pdm export --dev --without-hashes > /app/.venv/requirements.txt
+RUN uv sync --frozen --no-dev --no-install-project
 
 FROM python:$PYTHON_BASE
 
 WORKDIR /app
 
-COPY --from=builder /app/.venv/ /app/.venv
+COPY --from=builder /app/.venv /app/.venv
 
 ENV PATH="/app/.venv/bin:$PATH"
 COPY . .
