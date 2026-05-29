@@ -15,39 +15,31 @@ REQUEST_TIMEOUT = 60.0
 
 async def transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     message = update.message
-    if not message or not message.voice:
+    voice = message.voice
+
+    tg_file = await context.bot.get_file(voice.file_id)
+    audio = await tg_file.download_as_bytearray()
+
+    async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
+        response = await client.post(
+            GROQ_URL,
+            headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
+            files={"file": ("voice.ogg", audio, "audio/ogg")},
+            data={"model": settings.GROQ_MODEL, "language": "ru", "response_format": "json"},
+        )
+
+    if response.is_error:
+        logger.error("Groq вернул %s для chat=%s: %s", response.status_code, message.chat_id, response.text)
         return
 
-    if not settings.GROQ_API_KEY:
-        logger.warning("GROQ_API_KEY не задан, голосовое пропущено")
-        return
-
-    try:
-        tg_file = await context.bot.get_file(message.voice.file_id)
-        audio = await tg_file.download_as_bytearray()
-
-        data = {"model": settings.GROQ_MODEL, "response_format": "json"}
-        if settings.GROQ_LANGUAGE:
-            data["language"] = settings.GROQ_LANGUAGE
-
-        async with httpx.AsyncClient(timeout=REQUEST_TIMEOUT) as client:
-            response = await client.post(
-                GROQ_URL,
-                headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
-                files={"file": ("voice.ogg", bytes(audio), "audio/ogg")},
-                data=data,
-            )
-            response.raise_for_status()
-            text = response.json().get("text", "").strip()
-    except Exception:
-        logger.exception("Не удалось распознать голосовое")
-        return
-
-    if not text:
-        return
-
-    await message.reply_text(f"🎤 {text}")
+    text = response.json().get("text", "").strip()
+    if text:
+        await message.reply_text(f"🎤 {text}")
 
 
 def init(application: KrdDevBotApplication):
+    if not settings.GROQ_API_KEY:
+        logger.warning("GROQ_API_KEY не задан, whisper отключён")
+        return
+
     application.add_handler(MessageHandler(filters.VOICE, transcribe))
