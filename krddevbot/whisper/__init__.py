@@ -24,7 +24,7 @@ async def transcribe(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         response = await client.post(
             GROQ_URL,
             headers={"Authorization": f"Bearer {settings.GROQ_API_KEY}"},
-            files={"file": ("voice.ogg", audio, "audio/ogg")},
+            files={"file": ("voice.ogg", bytes(audio), "audio/ogg")},
             data={"model": settings.GROQ_MODEL, "language": "ru", "response_format": "json"},
         )
 
