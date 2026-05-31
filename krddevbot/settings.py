@@ -12,6 +12,6 @@ AVITO_THRESHOLD = int(os.environ.get("AVITO_THRESHOLD", "8"))
 REDIS_HOST = os.environ.get("REDIS_HOST", "localhost")
 REDIS_PASSWORD = os.environ.get("REDIS_PASSWORD", "")
 BANOFBOT_LIMIT = int(os.environ.get("BANOFBOT_LIMIT", "10"))
-BANOFBOT_DRY_RUN = bool(os.environ.get("BANOFBOT_DRY_RUN", "True"))
+BANOFBOT_DRY_RUN = os.environ.get("BANOFBOT_DRY_RUN", "True") == 'True'
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "whisper-large-v3-turbo")
